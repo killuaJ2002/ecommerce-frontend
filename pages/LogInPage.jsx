@@ -1,4 +1,45 @@
+import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
+
 const LoginPage = () => {
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+  const [errorMessage, setErrorMessage] = useState("");
+  const navigate = useNavigate();
+  const URL = "http://localhost:8000/api/users/login";
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setErrorMessage("");
+    try {
+      const response = await fetch(URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message);
+      }
+      navigate("/");
+    } catch (error) {
+      console.log(error);
+      setErrorMessage(error.message);
+    }
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
   const handleInputFocus = (e) => {
     e.target.style.outline = "none";
     e.target.style.borderColor = "#3b82f6";
@@ -53,6 +94,16 @@ const LoginPage = () => {
       color: "#1f2937",
       margin: "0 0 2rem 0",
     },
+    errorMessage: {
+      backgroundColor: "#fef2f2",
+      color: "#dc2626",
+      padding: "0.75rem",
+      borderRadius: "6px",
+      fontSize: "0.875rem",
+      marginBottom: "1.5rem",
+      border: "1px solid #fecaca",
+      textAlign: "center",
+    },
     formGroup: {
       marginBottom: "1.5rem",
     },
@@ -101,52 +152,62 @@ const LoginPage = () => {
       <div style={styles.card}>
         <h3 style={styles.title}>Login</h3>
 
-        <div style={styles.formGroup}>
-          <label htmlFor="email" style={styles.label}>
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            placeholder="Enter your email"
-            style={styles.input}
-            onFocus={handleInputFocus}
-            onBlur={handleInputBlur}
-          />
-        </div>
+        {errorMessage && <div style={styles.errorMessage}>{errorMessage}</div>}
 
-        <div style={styles.formGroup}>
-          <label htmlFor="password" style={styles.label}>
-            Password
-          </label>
-          <input
-            id="password"
-            type="password"
-            placeholder="Enter password"
-            style={styles.input}
-            onFocus={handleInputFocus}
-            onBlur={handleInputBlur}
-          />
-        </div>
+        <form onSubmit={handleSubmit}>
+          <div style={styles.formGroup}>
+            <label htmlFor="email" style={styles.label}>
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="Enter your email"
+              style={styles.input}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
+            />
+          </div>
 
-        <button
-          type="submit"
-          style={styles.button}
-          onMouseEnter={handleButtonHover}
-          onMouseLeave={handleButtonLeave}
-        >
-          Sign In
-        </button>
+          <div style={styles.formGroup}>
+            <label htmlFor="password" style={styles.label}>
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Enter password"
+              style={styles.input}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
+            />
+          </div>
+
+          <button
+            type="submit"
+            style={styles.button}
+            onMouseEnter={handleButtonHover}
+            onMouseLeave={handleButtonLeave}
+          >
+            Sign In
+          </button>
+        </form>
 
         <div style={styles.linkContainer}>
-          <a
-            href="#"
+          <Link
+            to="/signup"
             style={styles.link}
             onMouseEnter={handleLinkHover}
             onMouseLeave={handleLinkLeave}
           >
             Not a user? Sign up
-          </a>
+          </Link>
         </div>
       </div>
     </div>

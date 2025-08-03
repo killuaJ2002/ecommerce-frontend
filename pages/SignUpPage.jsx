@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 const SignUpPage = () => {
   const handleInputFocus = (e) => {
     e.target.style.outline = "none";
@@ -167,14 +168,14 @@ const SignUpPage = () => {
         </button>
 
         <div style={styles.linkContainer}>
-          <a
-            href="#"
+          <Link
+            to="/login"
             style={styles.link}
             onMouseEnter={handleLinkHover}
             onMouseLeave={handleLinkLeave}
           >
             Existing user? Login
-          </a>
+          </Link>
         </div>
       </div>
     </div>
