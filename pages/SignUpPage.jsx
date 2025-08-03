@@ -1,5 +1,47 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 const SignUpPage = () => {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+  const [errorMessage, setErrorMessage] = useState("");
+  const URL = "http://localhost:8000/api/users/signup";
+  const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setErrorMessage("");
+    try {
+      const response = await fetch(URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Signup failed");
+      }
+      navigate("/");
+    } catch (error) {
+      console.log(error);
+      setErrorMessage(error.message);
+    }
+  };
+
   const handleInputFocus = (e) => {
     e.target.style.outline = "none";
     e.target.style.borderColor = "#3b82f6";
@@ -95,6 +137,16 @@ const SignUpPage = () => {
       fontSize: "0.875rem",
       transition: "color 0.2s",
     },
+    errorMessage: {
+      backgroundColor: "#fef2f2",
+      color: "#dc2626",
+      padding: "0.75rem",
+      borderRadius: "6px",
+      fontSize: "0.875rem",
+      marginBottom: "1.5rem",
+      border: "1px solid #fecaca",
+      textAlign: "center",
+    },
   };
 
   return (
@@ -102,70 +154,86 @@ const SignUpPage = () => {
       <div style={styles.card}>
         <h3 style={styles.title}>Sign Up</h3>
 
-        <div style={styles.formGroup}>
-          <label htmlFor="name" style={styles.label}>
-            Name
-          </label>
-          <input
-            id="name"
-            type="text"
-            placeholder="Enter your Name"
-            style={styles.input}
-            onFocus={handleInputFocus}
-            onBlur={handleInputBlur}
-          />
-        </div>
+        {errorMessage && <div style={styles.errorMessage}>{errorMessage}</div>}
 
-        <div style={styles.formGroup}>
-          <label htmlFor="email" style={styles.label}>
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            placeholder="Enter your email"
-            style={styles.input}
-            onFocus={handleInputFocus}
-            onBlur={handleInputBlur}
-          />
-        </div>
+        <form onSubmit={handleSubmit}>
+          <div style={styles.formGroup}>
+            <label htmlFor="name" style={styles.label}>
+              Name
+            </label>
+            <input
+              id="name"
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              placeholder="Enter your Name"
+              style={styles.input}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
+            />
+          </div>
 
-        <div style={styles.formGroup}>
-          <label htmlFor="password" style={styles.label}>
-            Password
-          </label>
-          <input
-            id="password"
-            type="password"
-            placeholder="Enter password"
-            style={styles.input}
-            onFocus={handleInputFocus}
-            onBlur={handleInputBlur}
-          />
-        </div>
+          <div style={styles.formGroup}>
+            <label htmlFor="email" style={styles.label}>
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="Enter your email"
+              style={styles.input}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
+            />
+          </div>
 
-        <div style={styles.formGroup}>
-          <label htmlFor="confirmPassword" style={styles.label}>
-            Confirm Password
-          </label>
-          <input
-            id="confirmPassword"
-            type="password"
-            placeholder="Confirm password"
-            style={styles.input}
-            onFocus={handleInputFocus}
-            onBlur={handleInputBlur}
-          />
-        </div>
+          <div style={styles.formGroup}>
+            <label htmlFor="password" style={styles.label}>
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Enter password"
+              style={styles.input}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
+            />
+          </div>
 
-        <button
-          type="submit"
-          style={styles.button}
-          onMouseEnter={handleButtonHover}
-          onMouseLeave={handleButtonLeave}
-        >
-          Create Account
-        </button>
+          <div style={styles.formGroup}>
+            <label htmlFor="confirmPassword" style={styles.label}>
+              Confirm Password
+            </label>
+            <input
+              id="confirmPassword"
+              type="password"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              placeholder="Confirm password"
+              style={styles.input}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
+            />
+          </div>
+
+          <button
+            type="submit"
+            style={styles.button}
+            onMouseEnter={handleButtonHover}
+            onMouseLeave={handleButtonLeave}
+          >
+            Create Account
+          </button>
+        </form>
 
         <div style={styles.linkContainer}>
           <Link
