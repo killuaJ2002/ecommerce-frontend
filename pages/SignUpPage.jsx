@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+
 const SignUpPage = () => {
   const [formData, setFormData] = useState({
     name: "",
@@ -8,6 +9,7 @@ const SignUpPage = () => {
     confirmPassword: "",
   });
   const [errorMessage, setErrorMessage] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
   const URL = "http://localhost:8000/api/users/signup";
   const navigate = useNavigate();
 
@@ -18,11 +20,21 @@ const SignUpPage = () => {
       ...prev,
       [name]: value,
     }));
+
+    // Clear field error when user starts typing
+    if (fieldErrors[name]) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        [name]: [],
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage("");
+    setFieldErrors({});
+
     try {
       const response = await fetch(URL, {
         method: "POST",
@@ -31,10 +43,31 @@ const SignUpPage = () => {
         },
         body: JSON.stringify(formData),
       });
+
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Signup failed");
+
+        // Check if it's a validation error with field-specific errors
+        if (errorData.errors && Array.isArray(errorData.errors)) {
+          const groupedErrors = {};
+
+          // Group errors by field
+          errorData.errors.forEach((error) => {
+            const field = error.field;
+            if (!groupedErrors[field]) {
+              groupedErrors[field] = [];
+            }
+            groupedErrors[field].push(error.message);
+          });
+
+          setFieldErrors(groupedErrors);
+        } else {
+          // Fallback to general error message
+          throw new Error(errorData.message || "Signup failed");
+        }
+        return;
       }
+
       navigate("/");
     } catch (error) {
       console.log(error);
@@ -68,6 +101,12 @@ const SignUpPage = () => {
   const handleLinkLeave = (e) => {
     e.target.style.color = "#3b82f6";
   };
+
+  // Helper function to get input style with error state
+  const getInputStyle = (fieldName) => ({
+    ...styles.input,
+    borderColor: fieldErrors[fieldName]?.length > 0 ? "#dc2626" : "#d1d5db",
+  });
 
   // Styles object
   const styles = {
@@ -147,6 +186,12 @@ const SignUpPage = () => {
       border: "1px solid #fecaca",
       textAlign: "center",
     },
+    fieldError: {
+      color: "#dc2626",
+      fontSize: "0.75rem",
+      marginTop: "0.25rem",
+      lineHeight: "1.2",
+    },
   };
 
   return (
@@ -168,10 +213,16 @@ const SignUpPage = () => {
               value={formData.name}
               onChange={handleChange}
               placeholder="Enter your Name"
-              style={styles.input}
+              style={getInputStyle("name")}
               onFocus={handleInputFocus}
               onBlur={handleInputBlur}
             />
+            {fieldErrors.name &&
+              fieldErrors.name.map((error, index) => (
+                <div key={index} style={styles.fieldError}>
+                  {error}
+                </div>
+              ))}
           </div>
 
           <div style={styles.formGroup}>
@@ -185,10 +236,16 @@ const SignUpPage = () => {
               value={formData.email}
               onChange={handleChange}
               placeholder="Enter your email"
-              style={styles.input}
+              style={getInputStyle("email")}
               onFocus={handleInputFocus}
               onBlur={handleInputBlur}
             />
+            {fieldErrors.email &&
+              fieldErrors.email.map((error, index) => (
+                <div key={index} style={styles.fieldError}>
+                  {error}
+                </div>
+              ))}
           </div>
 
           <div style={styles.formGroup}>
@@ -202,10 +259,16 @@ const SignUpPage = () => {
               value={formData.password}
               onChange={handleChange}
               placeholder="Enter password"
-              style={styles.input}
+              style={getInputStyle("password")}
               onFocus={handleInputFocus}
               onBlur={handleInputBlur}
             />
+            {fieldErrors.password &&
+              fieldErrors.password.map((error, index) => (
+                <div key={index} style={styles.fieldError}>
+                  {error}
+                </div>
+              ))}
           </div>
 
           <div style={styles.formGroup}>
@@ -219,10 +282,16 @@ const SignUpPage = () => {
               value={formData.confirmPassword}
               onChange={handleChange}
               placeholder="Confirm password"
-              style={styles.input}
+              style={getInputStyle("confirmPassword")}
               onFocus={handleInputFocus}
               onBlur={handleInputBlur}
             />
+            {fieldErrors.confirmPassword &&
+              fieldErrors.confirmPassword.map((error, index) => (
+                <div key={index} style={styles.fieldError}>
+                  {error}
+                </div>
+              ))}
           </div>
 
           <button

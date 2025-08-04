@@ -7,11 +7,15 @@ const LoginPage = () => {
     password: "",
   });
   const [errorMessage, setErrorMessage] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
   const navigate = useNavigate();
   const URL = "http://localhost:8000/api/users/login";
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage("");
+    setFieldErrors({});
+
     try {
       const response = await fetch(URL, {
         method: "POST",
@@ -21,9 +25,29 @@ const LoginPage = () => {
         body: JSON.stringify(formData),
       });
       const data = await response.json();
+
       if (!response.ok) {
-        throw new Error(data.message);
+        // Check if it's a validation error with field-specific errors
+        if (data.errors && Array.isArray(data.errors)) {
+          const groupedErrors = {};
+
+          // Group errors by field
+          data.errors.forEach((error) => {
+            const field = error.field;
+            if (!groupedErrors[field]) {
+              groupedErrors[field] = [];
+            }
+            groupedErrors[field].push(error.message);
+          });
+
+          setFieldErrors(groupedErrors);
+        } else {
+          // Fallback to general error message
+          throw new Error(data.message);
+        }
+        return;
       }
+
       navigate("/");
     } catch (error) {
       console.log(error);
@@ -38,6 +62,14 @@ const LoginPage = () => {
       ...prev,
       [name]: value,
     }));
+
+    // Clear field error when user starts typing
+    if (fieldErrors[name]) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        [name]: [],
+      }));
+    }
   };
 
   const handleInputFocus = (e) => {
@@ -67,7 +99,13 @@ const LoginPage = () => {
     e.target.style.color = "#3b82f6";
   };
 
-  // Styles object moved to the bottom
+  // Helper function to get input style with error state
+  const getInputStyle = (fieldName) => ({
+    ...styles.input,
+    borderColor: fieldErrors[fieldName]?.length > 0 ? "#dc2626" : "#d1d5db",
+  });
+
+  // Styles object
   const styles = {
     container: {
       minHeight: "100vh",
@@ -145,6 +183,12 @@ const LoginPage = () => {
       fontSize: "0.875rem",
       transition: "color 0.2s",
     },
+    fieldError: {
+      color: "#dc2626",
+      fontSize: "0.75rem",
+      marginTop: "0.25rem",
+      lineHeight: "1.2",
+    },
   };
 
   return (
@@ -166,10 +210,16 @@ const LoginPage = () => {
               value={formData.email}
               onChange={handleChange}
               placeholder="Enter your email"
-              style={styles.input}
+              style={getInputStyle("email")}
               onFocus={handleInputFocus}
               onBlur={handleInputBlur}
             />
+            {fieldErrors.email &&
+              fieldErrors.email.map((error, index) => (
+                <div key={index} style={styles.fieldError}>
+                  {error}
+                </div>
+              ))}
           </div>
 
           <div style={styles.formGroup}>
@@ -183,10 +233,16 @@ const LoginPage = () => {
               value={formData.password}
               onChange={handleChange}
               placeholder="Enter password"
-              style={styles.input}
+              style={getInputStyle("password")}
               onFocus={handleInputFocus}
               onBlur={handleInputBlur}
             />
+            {fieldErrors.password &&
+              fieldErrors.password.map((error, index) => (
+                <div key={index} style={styles.fieldError}>
+                  {error}
+                </div>
+              ))}
           </div>
 
           <button
