@@ -35,6 +35,31 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
+  // Login function
+  const login = async (formData) => {
+    try {
+      const response = await fetch(`URL/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || "Login failed");
+      }
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      setToken(data.token);
+      setUser(data.user);
+      return { success: true, message: data.message };
+    } catch (error) {
+      console.log("Login error", error);
+      return { success: false, message: error.message };
+    }
+  };
+
   return (
     <AuthContext.Provider value={{ count, setCount }}>
       {children}
