@@ -1,5 +1,4 @@
 import { createContext, useContext, useState, useEffect } from "react";
-
 const AuthContext = createContext();
 
 export const useAuth = () => {
@@ -60,9 +59,62 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  return (
-    <AuthContext.Provider value={{ count, setCount }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  // Signup function
+  const signup = async (formData) => {
+    try {
+      const response = await fetch(`URL/signup`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(Data.message || "Signup failed");
+      }
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      setToken(data.token);
+      setUser(data.user);
+      return { success: true, message: data.message };
+    } catch (error) {
+      console.log("Signup error", error);
+      return { success: false, message: error.message };
+    }
+  };
+
+  // Logout function
+  const logout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setToken(null);
+    setUser(null);
+  };
+
+  // check if user is authenticated
+  const isAuthenticated = () => {
+    return !!(token && user);
+  };
+
+  // Get auth headers for API calls
+  const getAuthHeaders = () => {
+    return {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    };
+  };
+
+  const value = {
+    user,
+    token,
+    loading,
+    login,
+    signup,
+    logout,
+    isAuthenticated,
+    getAuthHeaders,
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
