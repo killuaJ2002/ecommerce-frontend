@@ -37,7 +37,7 @@ export const AuthProvider = ({ children }) => {
   // Login function
   const login = async (formData) => {
     try {
-      const response = await fetch(`URL/login`, {
+      const response = await fetch(`${URL}/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -62,7 +62,7 @@ export const AuthProvider = ({ children }) => {
   // Signup function
   const signup = async (formData) => {
     try {
-      const response = await fetch(`URL/signup`, {
+      const response = await fetch(`${URL}/signup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -71,7 +71,7 @@ export const AuthProvider = ({ children }) => {
       });
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(Data.message || "Signup failed");
+        throw new Error(data.message || "Signup failed");
       }
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));

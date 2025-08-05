@@ -8,6 +8,7 @@ import {
 import LoginPage from "../pages/LogInPage";
 import SignUpPage from "../pages/SignUpPage";
 import HomePage from "../pages/HomePage";
+import { AuthProvider } from "../context/AuthContext";
 const App = () => {
   const router = createBrowserRouter(
     createRoutesFromElements(
@@ -18,7 +19,11 @@ const App = () => {
       </>
     )
   );
-  return <RouterProvider router={router} />;
+  return (
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
+  );
 };
 
 export default App;

@@ -1,33 +1,45 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { useAuth } from "../context/AuthContext";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
-  const [errorMessage, setErrorMessage] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+
   const navigate = useNavigate();
-  const URL = "http://localhost:8000/api/users/login";
+  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrorMessage("");
     setFieldErrors({});
+    setIsLoading(true);
 
     try {
-      const response = await fetch(URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-      const data = await response.json();
+      const result = await login(formData);
 
-      if (!response.ok) {
-        // Check if it's a validation error with field-specific errors
+      if (result.success) {
+        navigate("/");
+      } else {
+        // Handle the error - could be field errors or general error
+        // Since AuthContext returns a general error message, we need to make
+        // another API call to get detailed field errors, or modify AuthContext
+        // to return more detailed error information
+
+        // For now, let's make a direct API call to get field-specific errors
+        const response = await fetch("http://localhost:8000/api/users/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        });
+
+        const data = await response.json();
+
         if (data.errors && Array.isArray(data.errors)) {
           const groupedErrors = {};
 
@@ -41,17 +53,16 @@ const LoginPage = () => {
           });
 
           setFieldErrors(groupedErrors);
-        } else {
-          // Fallback to general error message
-          throw new Error(data.message);
         }
-        return;
       }
-
-      navigate("/");
     } catch (error) {
       console.log(error);
-      setErrorMessage(error.message);
+      // Handle unexpected errors
+      setFieldErrors({
+        general: ["An unexpected error occurred. Please try again."],
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -84,11 +95,15 @@ const LoginPage = () => {
   };
 
   const handleButtonHover = (e) => {
-    e.target.style.backgroundColor = "#2563eb";
+    if (!isLoading) {
+      e.target.style.backgroundColor = "#2563eb";
+    }
   };
 
   const handleButtonLeave = (e) => {
-    e.target.style.backgroundColor = "#3b82f6";
+    if (!isLoading) {
+      e.target.style.backgroundColor = "#3b82f6";
+    }
   };
 
   const handleLinkHover = (e) => {
@@ -164,13 +179,13 @@ const LoginPage = () => {
     button: {
       width: "100%",
       padding: "0.75rem",
-      backgroundColor: "#3b82f6",
+      backgroundColor: isLoading ? "#9ca3af" : "#3b82f6",
       color: "white",
       border: "none",
       borderRadius: "6px",
       fontSize: "1rem",
       fontWeight: "500",
-      cursor: "pointer",
+      cursor: isLoading ? "not-allowed" : "pointer",
       transition: "background-color 0.2s",
     },
     linkContainer: {
@@ -196,7 +211,13 @@ const LoginPage = () => {
       <div style={styles.card}>
         <h3 style={styles.title}>Login</h3>
 
-        {errorMessage && <div style={styles.errorMessage}>{errorMessage}</div>}
+        {fieldErrors.general && (
+          <div style={styles.errorMessage}>
+            {fieldErrors.general.map((error, index) => (
+              <div key={index}>{error}</div>
+            ))}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit}>
           <div style={styles.formGroup}>
@@ -213,6 +234,7 @@ const LoginPage = () => {
               style={getInputStyle("email")}
               onFocus={handleInputFocus}
               onBlur={handleInputBlur}
+              disabled={isLoading}
             />
             {fieldErrors.email &&
               fieldErrors.email.map((error, index) => (
@@ -236,6 +258,7 @@ const LoginPage = () => {
               style={getInputStyle("password")}
               onFocus={handleInputFocus}
               onBlur={handleInputBlur}
+              disabled={isLoading}
             />
             {fieldErrors.password &&
               fieldErrors.password.map((error, index) => (
@@ -250,8 +273,9 @@ const LoginPage = () => {
             style={styles.button}
             onMouseEnter={handleButtonHover}
             onMouseLeave={handleButtonLeave}
+            disabled={isLoading}
           >
-            Sign In
+            {isLoading ? "Signing In..." : "Sign In"}
           </button>
         </form>
 
