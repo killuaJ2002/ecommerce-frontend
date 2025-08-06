@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const SignUpPage = () => {
   const [formData, setFormData] = useState({
@@ -8,10 +9,11 @@ const SignUpPage = () => {
     password: "",
     confirmPassword: "",
   });
-  const [errorMessage, setErrorMessage] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
-  const URL = "http://localhost:8000/api/users/signup";
+  const [isLoading, setIsLoading] = useState(false);
+
   const navigate = useNavigate();
+  const { signup } = useAuth();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -32,22 +34,27 @@ const SignUpPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrorMessage("");
     setFieldErrors({});
+    setIsLoading(true);
 
     try {
-      const response = await fetch(URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+      const result = await signup(formData);
 
-      if (!response.ok) {
+      if (result.success) {
+        navigate("/");
+      } else {
+        // Handle the error - could be field errors or general error
+        // Make a direct API call to get field-specific errors
+        const response = await fetch("http://localhost:8000/api/users/signup", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        });
+
         const errorData = await response.json();
 
-        // Check if it's a validation error with field-specific errors
         if (errorData.errors && Array.isArray(errorData.errors)) {
           const groupedErrors = {};
 
@@ -62,16 +69,20 @@ const SignUpPage = () => {
 
           setFieldErrors(groupedErrors);
         } else {
-          // Fallback to general error message
-          throw new Error(errorData.message || "Signup failed");
+          // Set general error
+          setFieldErrors({
+            general: [result.message || "Signup failed. Please try again."],
+          });
         }
-        return;
       }
-
-      navigate("/");
     } catch (error) {
       console.log(error);
-      setErrorMessage(error.message);
+      // Handle unexpected errors
+      setFieldErrors({
+        general: ["An unexpected error occurred. Please try again."],
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -87,11 +98,15 @@ const SignUpPage = () => {
   };
 
   const handleButtonHover = (e) => {
-    e.target.style.backgroundColor = "#2563eb";
+    if (!isLoading) {
+      e.target.style.backgroundColor = "#2563eb";
+    }
   };
 
   const handleButtonLeave = (e) => {
-    e.target.style.backgroundColor = "#3b82f6";
+    if (!isLoading) {
+      e.target.style.backgroundColor = "#3b82f6";
+    }
   };
 
   const handleLinkHover = (e) => {
@@ -157,13 +172,13 @@ const SignUpPage = () => {
     button: {
       width: "100%",
       padding: "0.75rem",
-      backgroundColor: "#3b82f6",
+      backgroundColor: isLoading ? "#9ca3af" : "#3b82f6",
       color: "white",
       border: "none",
       borderRadius: "6px",
       fontSize: "1rem",
       fontWeight: "500",
-      cursor: "pointer",
+      cursor: isLoading ? "not-allowed" : "pointer",
       transition: "background-color 0.2s",
     },
     linkContainer: {
@@ -199,7 +214,13 @@ const SignUpPage = () => {
       <div style={styles.card}>
         <h3 style={styles.title}>Sign Up</h3>
 
-        {errorMessage && <div style={styles.errorMessage}>{errorMessage}</div>}
+        {fieldErrors.general && (
+          <div style={styles.errorMessage}>
+            {fieldErrors.general.map((error, index) => (
+              <div key={index}>{error}</div>
+            ))}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit}>
           <div style={styles.formGroup}>
@@ -216,6 +237,7 @@ const SignUpPage = () => {
               style={getInputStyle("name")}
               onFocus={handleInputFocus}
               onBlur={handleInputBlur}
+              disabled={isLoading}
             />
             {fieldErrors.name &&
               fieldErrors.name.map((error, index) => (
@@ -239,6 +261,7 @@ const SignUpPage = () => {
               style={getInputStyle("email")}
               onFocus={handleInputFocus}
               onBlur={handleInputBlur}
+              disabled={isLoading}
             />
             {fieldErrors.email &&
               fieldErrors.email.map((error, index) => (
@@ -262,6 +285,7 @@ const SignUpPage = () => {
               style={getInputStyle("password")}
               onFocus={handleInputFocus}
               onBlur={handleInputBlur}
+              disabled={isLoading}
             />
             {fieldErrors.password &&
               fieldErrors.password.map((error, index) => (
@@ -285,6 +309,7 @@ const SignUpPage = () => {
               style={getInputStyle("confirmPassword")}
               onFocus={handleInputFocus}
               onBlur={handleInputBlur}
+              disabled={isLoading}
             />
             {fieldErrors.confirmPassword &&
               fieldErrors.confirmPassword.map((error, index) => (
@@ -299,8 +324,9 @@ const SignUpPage = () => {
             style={styles.button}
             onMouseEnter={handleButtonHover}
             onMouseLeave={handleButtonLeave}
+            disabled={isLoading}
           >
-            Create Account
+            {isLoading ? "Creating Account..." : "Create Account"}
           </button>
         </form>
 
