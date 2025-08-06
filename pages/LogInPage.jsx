@@ -8,6 +8,7 @@ const LoginPage = () => {
     password: "",
   });
   const [fieldErrors, setFieldErrors] = useState({});
+  const [generalError, setGeneralError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
@@ -16,34 +17,35 @@ const LoginPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setFieldErrors({});
+    setGeneralError("");
     setIsLoading(true);
 
     try {
-      const result = await login(formData);
+      // Make direct API call to get detailed error information
+      const response = await fetch("http://localhost:8000/api/users/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
 
-      if (result.success) {
-        navigate("/");
+      const data = await response.json();
+
+      if (response.ok) {
+        // Success - now use AuthContext to set the auth state
+        const result = await login(formData);
+        if (result.success) {
+          navigate("/");
+        } else {
+          // This shouldn't happen if our API call succeeded, but handle just in case
+          setGeneralError("Login failed. Please try again.");
+        }
       } else {
-        // Handle the error - could be field errors or general error
-        // Since AuthContext returns a general error message, we need to make
-        // another API call to get detailed field errors, or modify AuthContext
-        // to return more detailed error information
-
-        // For now, let's make a direct API call to get field-specific errors
-        const response = await fetch("http://localhost:8000/api/users/login", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        });
-
-        const data = await response.json();
-
+        // Handle different types of errors
         if (data.errors && Array.isArray(data.errors)) {
+          // Zod validation errors - show under input fields
           const groupedErrors = {};
-
-          // Group errors by field
           data.errors.forEach((error) => {
             const field = error.field;
             if (!groupedErrors[field]) {
@@ -51,16 +53,15 @@ const LoginPage = () => {
             }
             groupedErrors[field].push(error.message);
           });
-
           setFieldErrors(groupedErrors);
+        } else {
+          // Non-Zod errors (like "Invalid credentials") - show at top
+          setGeneralError(data.message || "Login failed. Please try again.");
         }
       }
     } catch (error) {
       console.log(error);
-      // Handle unexpected errors
-      setFieldErrors({
-        general: ["An unexpected error occurred. Please try again."],
-      });
+      setGeneralError("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -80,6 +81,11 @@ const LoginPage = () => {
         ...prev,
         [name]: [],
       }));
+    }
+
+    // Clear general error when user starts typing
+    if (generalError) {
+      setGeneralError("");
     }
   };
 
@@ -211,13 +217,7 @@ const LoginPage = () => {
       <div style={styles.card}>
         <h3 style={styles.title}>Login</h3>
 
-        {fieldErrors.general && (
-          <div style={styles.errorMessage}>
-            {fieldErrors.general.map((error, index) => (
-              <div key={index}>{error}</div>
-            ))}
-          </div>
-        )}
+        {generalError && <div style={styles.errorMessage}>{generalError}</div>}
 
         <form onSubmit={handleSubmit}>
           <div style={styles.formGroup}>
