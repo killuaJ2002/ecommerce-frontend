@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import styles from "./LoginPage.module.css";
 
-const LoginPage = () => {
+const LogInPage = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [fieldErrors, setFieldErrors] = useState({});
   const [generalError, setGeneralError] = useState("");
@@ -136,4 +136,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default LogInPage;
