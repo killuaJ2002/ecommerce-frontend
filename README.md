@@ -5,7 +5,7 @@ This is the **frontend** of an E-Commerce web application built using **React** 
 ## 🚀 Tech Stack
 
 - ⚛️ **React**
-- ⚡ **Vite** (for fast builds & hot reloads)
+- ⚡ **Vite**
 - 🎨 **TailwindCSS**
 - 🧭 **React Router**
 
