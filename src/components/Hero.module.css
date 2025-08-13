@@ -1,0 +1,52 @@
+section {
+  width: 100%;
+  min-height: 50vh; /* gives a nice hero feel */
+  padding: 2rem;
+  background: linear-gradient(135deg, #1f4c5c, #2b6d80);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.2rem;
+  text-align: center;
+  color: white;
+}
+
+h1 {
+  font-size: 2.5rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: color 0.3s ease;
+}
+
+h1:hover {
+  color: #ffcc00; /* same highlight as navbar links */
+}
+
+p {
+  font-size: 1.125rem;
+  font-style: italic;
+  max-width: 600px;
+  transition: color 0.3s ease;
+}
+
+p:hover {
+  color: #ffcc00;
+}
+
+button {
+  padding: 0.625rem 1rem;
+  border: 1px solid white;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  background-color: white;
+  color: #1f4c5c;
+  transform: translateY(-2px);
+}
