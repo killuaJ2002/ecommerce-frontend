@@ -1,66 +1,302 @@
 .navbar {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  background: linear-gradient(135deg, #17313E 0%, #1f4c5c 50%, #2b6d80 100%);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+  z-index: 1000;
+  border-bottom: 1px solid rgba(255, 204, 0, 0.1);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0 2rem;
-  height: 65px;
-  background: linear-gradient(90deg, #17313E, #1f4c5c);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  height: 70px;
 }
 
 .navbar_left {
+  flex: 0 0 auto;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  transition: transform 0.3s ease;
+}
+
+.logo:hover {
+  transform: scale(1.05);
+}
+
+.logoIcon {
+  font-size: 1.8rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.logoText {
   color: white;
-  font-size: 1.5rem;
-  font-weight: 600;
+  font-size: 1.75rem;
+  font-weight: 700;
   letter-spacing: 0.5px;
+  background: linear-gradient(45deg, white, #ffcc00);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.navbar_center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding: 0 2rem;
+}
+
+.searchContainer {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  align-items: center;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  padding-right: 3rem;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 25px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 0.95rem;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.searchInput::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #ffcc00;
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 20px rgba(255, 204, 0, 0.3);
+}
+
+.searchButton {
+  position: absolute;
+  right: 0.5rem;
+  background: linear-gradient(135deg, #ffcc00, #ffd700);
+  border: none;
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(255, 204, 0, 0.3);
+}
+
+.searchButton:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(255, 204, 0, 0.5);
+}
+
+.searchIcon {
+  font-size: 1rem;
 }
 
 .navbar_right {
   display: flex;
   align-items: center;
   gap: 1.5rem;
-  font-size: 1rem;
-  font-weight: 500;
+  flex: 0 0 auto;
 }
 
 .navLink {
-  position: relative; /* for the underline positioning */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
   color: white;
   text-decoration: none;
-  transition: color 0.3s ease;
-}
-
-.navLink::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: -4px; /* little gap below text */
-  width: 0%;
-  height: 2px;
-  background-color: #ffcc00;
-  transition: width 0.3s ease;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  font-size: 0.85rem;
+  font-weight: 500;
 }
 
 .navLink:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
   color: #ffcc00;
 }
 
-.navLink:hover::after {
-  width: 100%;
+.navIcon {
+  font-size: 1.2rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
-.navbar_right button {
-  background: transparent;
-  border: 1px solid white;
+.cartBadge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
   color: white;
-  padding: 0.4rem 0.8rem;
-  border-radius: 4px;
-  font-size: 0.9rem;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(255, 107, 107, 0.4);
+}
+
+.userMenu {
+  position: relative;
+}
+
+.userButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  background: transparent;
+  border: none;
+  color: white;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
+  font-size: 0.85rem;
+  font-weight: 500;
 }
 
-.navbar_right button:hover {
+.userButton:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+  color: #ffcc00;
+}
+
+.userIcon {
+  font-size: 1.2rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.5rem;
   background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
+  min-width: 150px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.userMenu:hover .dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.dropdownItem {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1rem;
   color: #17313E;
+  text-decoration: none;
+  background: none;
+  border: none;
+  text-align: left;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dropdownItem:hover {
+  background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+  color: #1f4c5c;
+}
+
+.loginButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  color: white;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border: 2px solid rgba(255, 204, 0, 0.3);
+  border-radius: 10px;
+  background: rgba(255, 204, 0, 0.1);
+  transition: all 0.3s ease;
+  font-size: 0.85rem;
+  font-weight: 500;
+  backdrop-filter: blur(10px);
+}
+
+.loginButton:hover {
+  background: linear-gradient(135deg, #ffcc00, #ffd700);
+  color: #17313E;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 204, 0, 0.4);
+  border-color: #ffcc00;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 1rem;
+  }
+  
+  .navbar_center {
+    display: none;
+  }
+  
+  .navbar_right {
+    gap: 1rem;
+  }
+  
+  .navLink span:last-child,
+  .userButton span:last-child,
+  .loginButton span:last-child {
+    display: none;
+  }
+  
+  .logoText {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar_right {
+    gap: 0.75rem;
+  }
+  
+  .navLink,
+  .userButton,
+  .loginButton {
+    padding: 0.5rem;
+  }
 }
