@@ -469,11 +469,8 @@
   display: none;
 }
 
-.cartIcon {
-  font-size: 1.1rem;
-}
 
-.compareBtn {
+.cartBtn {
   padding: 0.875rem 1rem;
   background: rgba(255, 204, 0, 0.1);
   color: #17313E;
@@ -484,7 +481,7 @@
   transition: all 0.3s ease;
 }
 
-.compareBtn:hover {
+.cartBtn:hover {
   background: rgba(255, 204, 0, 0.2);
   border-color: #ffcc00;
   transform: translateY(-2px);
@@ -687,8 +684,35 @@
     flex-direction: column;
   }
   
-  .compareBtn {
+  .cartBtn {
     align-self: center;
     width: fit-content;
   }
+
+  /* Make cart button visually and functionally disabled (same feel as .addToCartBtn.disabled) */
+.cartBtn.disabled {
+  background: #94a3b8;
+  border-color: #94a3b8;
+  color: white;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  opacity: 0.7;
+  pointer-events: none; /* prevents hover/click interactions */
+}
+
+/* Ensure hover doesn't change anything when disabled */
+.cartBtn.disabled:hover {
+  background: #94a3b8;
+  border-color: #94a3b8;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Remove visual emphasis like ::before used on addToCartBtn (if any overlay exists for cartBtn, neutralize it) */
+.cartBtn.disabled::before {
+  display: none;
+}
+
+
 }

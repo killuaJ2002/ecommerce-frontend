@@ -1,14 +1,31 @@
 import { useState, useEffect } from "react";
 import styles from "./Products.module.css";
 
+const API_URL = "http://localhost:8000/api/products";
+const DEFAULT_IMAGE =
+  "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop";
+
+const guessCategory = (name = "") => {
+  const n = name.toLowerCase();
+  if (
+    /(mouse|keyboard|headset|charger|hard drive|ssd|hdd|laptop|monitor)/.test(n)
+  )
+    return "electronics";
+  if (/(cable|case|cover|strap|stand|adapter)/.test(n)) return "accessories";
+  return "gadgets";
+};
+
 const Products = () => {
   const [activeCategory, setActiveCategory] = useState("all");
   const [viewMode, setViewMode] = useState("grid");
   const [sortBy, setSortBy] = useState("featured");
-  const [favorites, setFavorites] = useState(new Set());
   const [animationTrigger, setAnimationTrigger] = useState(false);
 
-  // Simplified categories - you can add category field to your Product model later if needed
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  // Categories
   const categories = [
     { id: "all", name: "All Products", icon: "🏪" },
     { id: "electronics", name: "Electronics", icon: "📱" },
@@ -16,81 +33,41 @@ const Products = () => {
     { id: "gadgets", name: "Gadgets", icon: "⌚" },
   ];
 
-  // Sample products matching your database schema (id, name, description, price, stock)
-  // In real app, you'd fetch this from your API
-  const products = [
-    {
-      id: 1,
-      name: "Wireless Headphones Pro",
-      description:
-        "Premium wireless headphones with noise cancellation and long battery life",
-      price: 79.99,
-      stock: 15,
-      category: "electronics", // This would be added later to your schema
-      image:
-        "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop",
-    },
-    {
-      id: 2,
-      name: "Smart Watch Series 8",
-      description:
-        "Advanced smartwatch with health monitoring and GPS tracking capabilities",
-      price: 199.99,
-      stock: 8,
-      category: "gadgets",
-      image:
-        "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop",
-    },
-    {
-      id: 3,
-      name: "Aluminum Laptop Stand",
-      description:
-        "Ergonomic adjustable laptop stand made from premium aluminum",
-      price: 49.99,
-      stock: 22,
-      category: "accessories",
-      image:
-        "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=400&h=400&fit=crop",
-    },
-    {
-      id: 4,
-      name: "Premium Bluetooth Speaker",
-      description:
-        "High-quality portable speaker with 360-degree sound and waterproof design",
-      price: 89.99,
-      stock: 0, // Out of stock
-      category: "electronics",
-      image:
-        "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400&h=400&fit=crop",
-    },
-    {
-      id: 5,
-      name: "Ergonomic Wireless Mouse",
-      description:
-        "Comfortable wireless mouse designed for extended use with silent clicks",
-      price: 29.99,
-      stock: 45,
-      category: "accessories",
-      image:
-        "https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=400&h=400&fit=crop",
-    },
-    {
-      id: 6,
-      name: "Multi-Port USB-C Hub",
-      description:
-        "Professional 8-in-1 USB-C hub with 4K support and fast data transfer",
-      price: 59.99,
-      stock: 12,
-      category: "gadgets",
-      image:
-        "https://images.unsplash.com/photo-1591488320449-011701bb6704?w=400&h=400&fit=crop",
-    },
-  ];
+  // Fetch products from API
+  useEffect(() => {
+    const ac = new AbortController();
+    (async () => {
+      try {
+        setLoading(true);
+        setError("");
+        const res = await fetch(API_URL, { signal: ac.signal });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
 
-  const filteredProducts = products.filter(
-    (product) => activeCategory === "all" || product.category === activeCategory
-  );
+        // Normalize: add generic image + category
+        const normalized = (data?.products || []).map((p) => ({
+          ...p,
+          image: DEFAULT_IMAGE,
+          category: p.category || guessCategory(p.name),
+        }));
 
+        setProducts(normalized);
+      } catch (e) {
+        if (e.name !== "AbortError") setError("Failed to load products.");
+      } finally {
+        setLoading(false);
+      }
+    })();
+    return () => ac.abort();
+  }, []);
+
+  // Filter by category
+  const filteredProducts =
+    activeCategory === "all"
+      ? products
+      : products.filter((p) => p.category === activeCategory);
+
+  // Sorting
   const sortedProducts = [...filteredProducts].sort((a, b) => {
     switch (sortBy) {
       case "price-low":
@@ -109,16 +86,6 @@ const Products = () => {
     const timer = setTimeout(() => setAnimationTrigger(false), 100);
     return () => clearTimeout(timer);
   }, [activeCategory, sortBy]);
-
-  const toggleFavorite = (productId) => {
-    const newFavorites = new Set(favorites);
-    if (newFavorites.has(productId)) {
-      newFavorites.delete(productId);
-    } else {
-      newFavorites.add(productId);
-    }
-    setFavorites(newFavorites);
-  };
 
   return (
     <section className={styles.productsSection}>
@@ -180,109 +147,121 @@ const Products = () => {
           </div>
         </div>
 
-        <div
-          className={`${styles.productsGrid} ${styles[viewMode]} ${
-            animationTrigger ? styles.animate : ""
-          }`}
-        >
-          {sortedProducts.map((product, index) => (
+        {/* Loading & Error states */}
+        {loading && <p className={styles.resultsText}>Loading products…</p>}
+        {error && !loading && <p className={styles.resultsText}>{error}</p>}
+
+        {!loading && !error && (
+          <>
             <div
-              key={product.id}
-              className={styles.productCard}
-              style={{ "--delay": `${index * 0.1}s` }}
+              className={`${styles.productsGrid} ${styles[viewMode]} ${
+                animationTrigger ? styles.animate : ""
+              }`}
             >
-              {/* Stock Status Badges */}
-              {product.stock === 0 && (
-                <div className={styles.outOfStock}>Out of Stock</div>
-              )}
-              {product.stock > 0 && product.stock <= 5 && (
-                <div className={styles.lowStock}>Low Stock</div>
-              )}
+              {sortedProducts.map((product, index) => (
+                <div
+                  key={product.id}
+                  className={styles.productCard}
+                  style={{ "--delay": `${index * 0.1}s` }}
+                >
+                  {/* Stock Status Badges */}
+                  {product.stock === 0 && (
+                    <div className={styles.outOfStock}>Out of Stock</div>
+                  )}
+                  {product.stock > 0 && product.stock <= 5 && (
+                    <div className={styles.lowStock}>Low Stock</div>
+                  )}
 
-              <div className={styles.imageContainer}>
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className={styles.productImage}
-                />
-                <div className={styles.imageOverlay}>
-                  <button
-                    className={styles.quickView}
-                    onClick={() => console.log("Quick view:", product.id)}
-                  >
-                    👁 Quick View
-                  </button>
-                  <button
-                    className={`${styles.favoriteBtn} ${
-                      favorites.has(product.id) ? styles.favorited : ""
-                    }`}
-                    onClick={() => toggleFavorite(product.id)}
-                  >
-                    {favorites.has(product.id) ? "❤️" : "🤍"}
-                  </button>
-                </div>
-              </div>
+                  <div className={styles.imageContainer}>
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className={styles.productImage}
+                      loading="lazy"
+                    />
+                    <div className={styles.imageOverlay}>
+                      <button
+                        className={styles.quickView}
+                        onClick={() => console.log("Quick view:", product.id)}
+                      >
+                        👁 Quick View
+                      </button>
+                    </div>
+                  </div>
 
-              <div className={styles.productInfo}>
-                <div className={styles.productHeader}>
-                  <h3 className={styles.productName}>{product.name}</h3>
-                </div>
+                  <div className={styles.productInfo}>
+                    <div className={styles.productHeader}>
+                      <h3 className={styles.productName}>{product.name}</h3>
+                    </div>
 
-                <div className={styles.description}>
-                  <p>{product.description}</p>
-                </div>
+                    <div className={styles.description}>
+                      <p>{product.description}</p>
+                    </div>
 
-                <div className={styles.stockInfo}>
-                  <span className={styles.stockLabel}>Stock:</span>
-                  <span
-                    className={`${styles.stockValue} ${
-                      product.stock === 0
-                        ? styles.outOfStockText
-                        : product.stock <= 5
-                        ? styles.lowStockText
-                        : styles.inStockText
-                    }`}
-                  >
-                    {product.stock === 0
-                      ? "Out of Stock"
-                      : `${product.stock} available`}
-                  </span>
-                </div>
+                    <div className={styles.stockInfo}>
+                      <span className={styles.stockLabel}>Stock:</span>
+                      <span
+                        className={`${styles.stockValue} ${
+                          product.stock === 0
+                            ? styles.outOfStockText
+                            : product.stock <= 5
+                            ? styles.lowStockText
+                            : styles.inStockText
+                        }`}
+                      >
+                        {product.stock === 0
+                          ? "Out of Stock"
+                          : `${product.stock} available`}
+                      </span>
+                    </div>
 
-                <div className={styles.priceSection}>
-                  <div className={styles.prices}>
-                    <span className={styles.currentPrice}>
-                      ${product.price}
-                    </span>
+                    <div className={styles.priceSection}>
+                      <div className={styles.prices}>
+                        <span className={styles.currentPrice}>
+                          ₹{product.price}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className={styles.actions}>
+                      {/* 1) First button -> Buy Now (text), keep same disabled logic */}
+                      <button
+                        className={`${styles.addToCartBtn} ${
+                          product.stock === 0 ? styles.disabled : ""
+                        }`}
+                        disabled={product.stock === 0}
+                      >
+                        {product.stock === 0 ? "Out of Stock" : "Buy Now"}
+                      </button>
+
+                      {/* 2) Second button -> icon-only Add to Cart (no text) */}
+                      <button
+                        className={`${styles.cartBtn} ${
+                          product.stock === 0 ? styles.disabled : ""
+                        }`}
+                        aria-label="Add to Cart"
+                        title="Add to Cart"
+                        disabled={product.stock === 0}
+                      >
+                        🛒
+                      </button>
+                    </div>
                   </div>
                 </div>
-
-                <div className={styles.actions}>
-                  <button
-                    className={`${styles.addToCartBtn} ${
-                      product.stock === 0 ? styles.disabled : ""
-                    }`}
-                    disabled={product.stock === 0}
-                  >
-                    <span className={styles.cartIcon}>🛒</span>
-                    {product.stock === 0 ? "Out of Stock" : "Add to Cart"}
-                  </button>
-                  <button className={styles.compareBtn}>⚖️</button>
-                </div>
-              </div>
+              ))}
             </div>
-          ))}
-        </div>
 
-        <div className={styles.loadMore}>
-          <button className={styles.loadMoreBtn}>
-            Load More Products
-            <span className={styles.loadIcon}>↓</span>
-          </button>
-          <p className={styles.resultsText}>
-            Showing {sortedProducts.length} products
-          </p>
-        </div>
+            <div className={styles.loadMore}>
+              <button className={styles.loadMoreBtn}>
+                Load More Products
+                <span className={styles.loadIcon}>↓</span>
+              </button>
+              <p className={styles.resultsText}>
+                Showing {sortedProducts.length} products
+              </p>
+            </div>
+          </>
+        )}
       </div>
     </section>
   );
