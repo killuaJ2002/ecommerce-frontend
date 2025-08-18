@@ -235,16 +235,15 @@ const Products = () => {
                       </button>
 
                       {/* 2) Second button -> icon-only Add to Cart (no text) */}
-                      <button
-                        className={`${styles.cartBtn} ${
-                          product.stock === 0 ? styles.disabled : ""
-                        }`}
-                        aria-label="Add to Cart"
-                        title="Add to Cart"
-                        disabled={product.stock === 0}
-                      >
-                        🛒
-                      </button>
+                      {product.stock > 0 && (
+                        <button
+                          className={`${styles.cartBtn}`}
+                          aria-label="Add to Cart"
+                          title="Add to Cart"
+                        >
+                          🛒
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
