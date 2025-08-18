@@ -8,6 +8,7 @@ const Products = () => {
   const [favorites, setFavorites] = useState(new Set());
   const [animationTrigger, setAnimationTrigger] = useState(false);
 
+  // Simplified categories - you can add category field to your Product model later if needed
   const categories = [
     { id: "all", name: "All Products", icon: "🏪" },
     { id: "electronics", name: "Electronics", icon: "📱" },
@@ -15,108 +16,74 @@ const Products = () => {
     { id: "gadgets", name: "Gadgets", icon: "⌚" },
   ];
 
+  // Sample products matching your database schema (id, name, description, price, stock)
+  // In real app, you'd fetch this from your API
   const products = [
     {
       id: 1,
       name: "Wireless Headphones Pro",
-      category: "electronics",
+      description:
+        "Premium wireless headphones with noise cancellation and long battery life",
       price: 79.99,
-      originalPrice: 99.99,
+      stock: 15,
+      category: "electronics", // This would be added later to your schema
       image:
         "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop",
-      rating: 4.8,
-      reviews: 324,
-      discount: 20,
-      badge: "Best Seller",
-      tags: ["Noise Cancelling", "24h Battery", "Fast Charge"],
-      inStock: true,
-      isNew: false,
-      colors: ["#000000", "#ffffff", "#ff6b6b"],
     },
     {
       id: 2,
       name: "Smart Watch Series 8",
-      category: "gadgets",
+      description:
+        "Advanced smartwatch with health monitoring and GPS tracking capabilities",
       price: 199.99,
-      originalPrice: 249.99,
+      stock: 8,
+      category: "gadgets",
       image:
         "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop",
-      rating: 4.9,
-      reviews: 189,
-      discount: 20,
-      badge: "Editor's Choice",
-      tags: ["Health Monitor", "GPS", "Water Resistant"],
-      inStock: true,
-      isNew: true,
-      colors: ["#000000", "#c0c0c0", "#ffd700"],
     },
     {
       id: 3,
       name: "Aluminum Laptop Stand",
-      category: "accessories",
+      description:
+        "Ergonomic adjustable laptop stand made from premium aluminum",
       price: 49.99,
-      originalPrice: 69.99,
+      stock: 22,
+      category: "accessories",
       image:
         "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=400&h=400&fit=crop",
-      rating: 4.6,
-      reviews: 156,
-      discount: 29,
-      badge: "Limited Time",
-      tags: ["Adjustable", "Cooling", "Portable"],
-      inStock: true,
-      isNew: false,
-      colors: ["#c0c0c0", "#000000"],
     },
     {
       id: 4,
       name: "Premium Bluetooth Speaker",
-      category: "electronics",
+      description:
+        "High-quality portable speaker with 360-degree sound and waterproof design",
       price: 89.99,
-      originalPrice: 119.99,
+      stock: 0, // Out of stock
+      category: "electronics",
       image:
         "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400&h=400&fit=crop",
-      rating: 4.7,
-      reviews: 203,
-      discount: 25,
-      badge: "Trending",
-      tags: ["360° Sound", "Waterproof", "15h Battery"],
-      inStock: false,
-      isNew: false,
-      colors: ["#000000", "#ff6b6b", "#4facfe"],
     },
     {
       id: 5,
       name: "Ergonomic Wireless Mouse",
-      category: "accessories",
+      description:
+        "Comfortable wireless mouse designed for extended use with silent clicks",
       price: 29.99,
-      originalPrice: 39.99,
+      stock: 45,
+      category: "accessories",
       image:
         "https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=400&h=400&fit=crop",
-      rating: 4.4,
-      reviews: 91,
-      discount: 25,
-      badge: "Value Pick",
-      tags: ["Ergonomic", "Silent Click", "Long Range"],
-      inStock: true,
-      isNew: false,
-      colors: ["#000000", "#ffffff", "#808080"],
     },
     {
       id: 6,
       name: "Multi-Port USB-C Hub",
-      category: "gadgets",
+      description:
+        "Professional 8-in-1 USB-C hub with 4K support and fast data transfer",
       price: 59.99,
-      originalPrice: 79.99,
+      stock: 12,
+      category: "gadgets",
       image:
         "https://images.unsplash.com/photo-1591488320449-011701bb6704?w=400&h=400&fit=crop",
-      rating: 4.5,
-      reviews: 167,
-      discount: 25,
-      badge: "Professional",
-      tags: ["8-in-1", "4K Support", "Fast Data"],
-      inStock: true,
-      isNew: true,
-      colors: ["#c0c0c0", "#000000"],
     },
   ];
 
@@ -130,10 +97,8 @@ const Products = () => {
         return a.price - b.price;
       case "price-high":
         return b.price - a.price;
-      case "rating":
-        return b.rating - a.rating;
-      case "newest":
-        return b.isNew - a.isNew;
+      case "name":
+        return a.name.localeCompare(b.name);
       default:
         return 0;
     }
@@ -155,39 +120,6 @@ const Products = () => {
     setFavorites(newFavorites);
   };
 
-  const renderStars = (rating) => {
-    const stars = [];
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 !== 0;
-
-    for (let i = 0; i < fullStars; i++) {
-      stars.push(
-        <span key={i} className={styles.star}>
-          ★
-        </span>
-      );
-    }
-
-    if (hasHalfStar) {
-      stars.push(
-        <span key="half" className={styles.halfStar}>
-          ★
-        </span>
-      );
-    }
-
-    const emptyStars = 5 - Math.ceil(rating);
-    for (let i = 0; i < emptyStars; i++) {
-      stars.push(
-        <span key={`empty-${i}`} className={styles.emptyStar}>
-          ★
-        </span>
-      );
-    }
-
-    return stars;
-  };
-
   return (
     <section className={styles.productsSection}>
       <div className={styles.container}>
@@ -196,10 +128,7 @@ const Products = () => {
             <div className={styles.titleSection}>
               <span className={styles.badge}>🔥 Hot Deals</span>
               <h2>Featured Products</h2>
-              <p>
-                Discover our handpicked selection of premium products with
-                exclusive offers
-              </p>
+              <p>Discover our handpicked selection of premium products</p>
             </div>
 
             <div className={styles.controls}>
@@ -230,8 +159,7 @@ const Products = () => {
                 <option value="featured">Featured</option>
                 <option value="price-low">Price: Low to High</option>
                 <option value="price-high">Price: High to Low</option>
-                <option value="rating">Top Rated</option>
-                <option value="newest">Newest First</option>
+                <option value="name">Name: A to Z</option>
               </select>
             </div>
           </div>
@@ -263,15 +191,12 @@ const Products = () => {
               className={styles.productCard}
               style={{ "--delay": `${index * 0.1}s` }}
             >
-              {!product.inStock && (
+              {/* Stock Status Badges */}
+              {product.stock === 0 && (
                 <div className={styles.outOfStock}>Out of Stock</div>
               )}
-              {product.isNew && <div className={styles.newBadge}>NEW</div>}
-              {product.discount && (
-                <div className={styles.discountBadge}>-{product.discount}%</div>
-              )}
-              {product.badge && (
-                <div className={styles.specialBadge}>{product.badge}</div>
+              {product.stock > 0 && product.stock <= 5 && (
+                <div className={styles.lowStock}>Low Stock</div>
               )}
 
               <div className={styles.imageContainer}>
@@ -301,32 +226,26 @@ const Products = () => {
               <div className={styles.productInfo}>
                 <div className={styles.productHeader}>
                   <h3 className={styles.productName}>{product.name}</h3>
-                  <div className={styles.colorOptions}>
-                    {product.colors.map((color, i) => (
-                      <div
-                        key={i}
-                        className={styles.colorDot}
-                        style={{ backgroundColor: color }}
-                      />
-                    ))}
-                  </div>
                 </div>
 
-                <div className={styles.tags}>
-                  {product.tags.slice(0, 2).map((tag, i) => (
-                    <span key={i} className={styles.tag}>
-                      {tag}
-                    </span>
-                  ))}
+                <div className={styles.description}>
+                  <p>{product.description}</p>
                 </div>
 
-                <div className={styles.rating}>
-                  <div className={styles.stars}>
-                    {renderStars(product.rating)}
-                  </div>
-                  <span className={styles.ratingText}>{product.rating}</span>
-                  <span className={styles.reviewCount}>
-                    ({product.reviews} reviews)
+                <div className={styles.stockInfo}>
+                  <span className={styles.stockLabel}>Stock:</span>
+                  <span
+                    className={`${styles.stockValue} ${
+                      product.stock === 0
+                        ? styles.outOfStockText
+                        : product.stock <= 5
+                        ? styles.lowStockText
+                        : styles.inStockText
+                    }`}
+                  >
+                    {product.stock === 0
+                      ? "Out of Stock"
+                      : `${product.stock} available`}
                   </span>
                 </div>
 
@@ -335,28 +254,18 @@ const Products = () => {
                     <span className={styles.currentPrice}>
                       ${product.price}
                     </span>
-                    {product.originalPrice && (
-                      <span className={styles.originalPrice}>
-                        ${product.originalPrice}
-                      </span>
-                    )}
                   </div>
-                  {product.discount && (
-                    <div className={styles.savings}>
-                      Save ${(product.originalPrice - product.price).toFixed(2)}
-                    </div>
-                  )}
                 </div>
 
                 <div className={styles.actions}>
                   <button
                     className={`${styles.addToCartBtn} ${
-                      !product.inStock ? styles.disabled : ""
+                      product.stock === 0 ? styles.disabled : ""
                     }`}
-                    disabled={!product.inStock}
+                    disabled={product.stock === 0}
                   >
                     <span className={styles.cartIcon}>🛒</span>
-                    {product.inStock ? "Add to Cart" : "Out of Stock"}
+                    {product.stock === 0 ? "Out of Stock" : "Add to Cart"}
                   </button>
                   <button className={styles.compareBtn}>⚖️</button>
                 </div>
@@ -371,7 +280,7 @@ const Products = () => {
             <span className={styles.loadIcon}>↓</span>
           </button>
           <p className={styles.resultsText}>
-            Showing {sortedProducts.length} of 24 products
+            Showing {sortedProducts.length} products
           </p>
         </div>
       </div>
