@@ -4,7 +4,7 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: #fff8e1; /* soft yellow background to match navbar */
+  background: linear-gradient(to bottom, #ffffff, #ffe7a0);
 }
 
 .signupContainer {
