@@ -690,3 +690,23 @@
   }
 
 }
+
+.cartBtn.loading {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cartBtn:disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+/* Optional: Add a subtle animation */
+.cartBtn.loading {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}

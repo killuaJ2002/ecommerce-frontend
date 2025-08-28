@@ -8,7 +8,10 @@ import {
 import LogInPage from "./pages/LogInPage";
 import SignUpPage from "./pages/SignUpPage";
 import HomePage from "./pages/HomePage";
+import CartPage from "./pages/CartPage";
+import NotFoundPage from "./pages/NotFoundPage";
 import { AuthProvider } from "./context/AuthContext";
+import { ToastContainer } from "react-toastify";
 const App = () => {
   const router = createBrowserRouter(
     createRoutesFromElements(
@@ -16,12 +19,15 @@ const App = () => {
         <Route path="login" element={<LogInPage />} />
         <Route path="signup" element={<SignUpPage />} />
         <Route index element={<HomePage />} />
+        <Route path="cart" element={<CartPage />} />
+        <Route path="*" element={<NotFoundPage />} />
       </>
     )
   );
   return (
     <AuthProvider>
       <RouterProvider router={router} />
+      <ToastContainer position="top-right" autoClose={3000} />
     </AuthProvider>
   );
 };

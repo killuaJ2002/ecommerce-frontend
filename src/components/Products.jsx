@@ -4,8 +4,10 @@ import ProductGrid from "./ProductGrid";
 import LoadingStates from "./LoadingStates";
 import LoadMore from "./LoadMore";
 import styles from "./Products.module.css";
+import { useAuth } from "../context/AuthContext";
+import { toast } from "react-toastify";
 
-const API_URL = "http://localhost:8000/api/products";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const DEFAULT_IMAGE =
   "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop";
 
@@ -28,6 +30,8 @@ const Products = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [addingToCart, setAddingToCart] = useState(null);
+  const { getAuthHeaders } = useAuth();
 
   // Categories
   const categories = [
@@ -44,7 +48,9 @@ const Products = () => {
       try {
         setLoading(true);
         setError("");
-        const res = await fetch(API_URL, { signal: ac.signal });
+        const res = await fetch(`${API_BASE_URL}/products`, {
+          signal: ac.signal,
+        });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
 
@@ -97,8 +103,30 @@ const Products = () => {
     console.log("Quick view:", productId);
   };
 
-  const handleAddToCart = (product) => {
-    console.log("Add to cart:", product);
+  const handleAddToCart = async (product) => {
+    try {
+      setAddingToCart(product.id);
+      const id = product.id;
+      const res = await fetch(`${API_BASE_URL}/cart`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          productId: id,
+          quantity: 1,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message);
+      }
+      console.log("Item added to cart", data.cart);
+      toast.success("Successfully added item to cart");
+    } catch (error) {
+      console.error("Failed to add to cart:", error.message);
+      toast.error("Failed to add item to cart");
+    } finally {
+      setAddingToCart(null);
+    }
   };
 
   const handleBuyNow = (product) => {
@@ -133,6 +161,7 @@ const Products = () => {
               onQuickView={handleQuickView}
               onAddToCart={handleAddToCart}
               onBuyNow={handleBuyNow}
+              addingToCart={addingToCart}
             />
 
             <LoadMore

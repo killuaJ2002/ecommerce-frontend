@@ -8,6 +8,7 @@ const ProductGrid = ({
   onQuickView,
   onAddToCart,
   onBuyNow,
+  addingToCart,
 }) => {
   return (
     <div
@@ -23,6 +24,7 @@ const ProductGrid = ({
           onQuickView={onQuickView}
           onAddToCart={onAddToCart}
           onBuyNow={onBuyNow}
+          isAddingToCart={addingToCart === product.id}
         />
       ))}
     </div>

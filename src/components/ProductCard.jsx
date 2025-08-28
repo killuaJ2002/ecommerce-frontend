@@ -6,6 +6,7 @@ const ProductCard = ({
   onQuickView,
   onAddToCart,
   onBuyNow,
+  isAddingToCart = false,
 }) => {
   return (
     <div
@@ -82,15 +83,18 @@ const ProductCard = ({
             {product.stock === 0 ? "Out of Stock" : "Buy Now"}
           </button>
 
-          {/* Add to Cart button */}
+          {/* Add to Cart button with loading state */}
           {product.stock > 0 && (
             <button
-              className={`${styles.cartBtn}`}
+              className={`${styles.cartBtn} ${
+                isAddingToCart ? styles.loading : ""
+              }`}
               aria-label="Add to Cart"
               title="Add to Cart"
+              disabled={isAddingToCart} // Disable while loading
               onClick={() => onAddToCart(product)}
             >
-              🛒
+              {isAddingToCart ? "⏳" : "🛒"}
             </button>
           )}
         </div>
