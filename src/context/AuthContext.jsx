@@ -1,10 +1,11 @@
 import { createContext, useContext, useState, useEffect } from "react";
+
 const AuthContext = createContext();
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error("useAuth must be used within an Authprovider");
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
@@ -97,8 +98,14 @@ export const AuthProvider = ({ children }) => {
     return !!(token && user);
   };
 
-  // Get auth headers for API calls
+  // Get auth headers for API calls - with better error handling
   const getAuthHeaders = () => {
+    if (!token) {
+      console.warn("No token available for auth headers");
+      return {
+        "Content-Type": "application/json",
+      };
+    }
     return {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
