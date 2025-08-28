@@ -1,4 +1,8 @@
 import { useState, useEffect } from "react";
+import ProductFilters from "./ProductFilters";
+import ProductGrid from "./ProductGrid";
+import LoadingStates from "./LoadingStates";
+import LoadMore from "./LoadMore";
 import styles from "./Products.module.css";
 
 const API_URL = "http://localhost:8000/api/products";
@@ -81,184 +85,60 @@ const Products = () => {
     }
   });
 
+  // Animation trigger for category/sort changes
   useEffect(() => {
     setAnimationTrigger(true);
     const timer = setTimeout(() => setAnimationTrigger(false), 100);
     return () => clearTimeout(timer);
   }, [activeCategory, sortBy]);
 
+  // Event handlers
+  const handleQuickView = (productId) => {
+    console.log("Quick view:", productId);
+  };
+
+  const handleAddToCart = (product) => {
+    console.log("Add to cart:", product);
+  };
+
+  const handleBuyNow = (product) => {
+    console.log("Buy now:", product);
+  };
+
+  const handleLoadMore = () => {
+    console.log("Load more products");
+  };
+
   return (
     <section className={styles.productsSection}>
       <div className={styles.container}>
-        <div className={styles.header}>
-          <div className={styles.headerContent}>
-            <div className={styles.titleSection}>
-              <span className={styles.badge}>🔥 Hot Deals</span>
-              <h2>Featured Products</h2>
-              <p>Discover our handpicked selection of premium products</p>
-            </div>
+        <ProductFilters
+          categories={categories}
+          activeCategory={activeCategory}
+          onCategoryChange={setActiveCategory}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+          sortBy={sortBy}
+          onSortChange={setSortBy}
+        />
 
-            <div className={styles.controls}>
-              <div className={styles.viewToggle}>
-                <button
-                  className={`${styles.viewButton} ${
-                    viewMode === "grid" ? styles.active : ""
-                  }`}
-                  onClick={() => setViewMode("grid")}
-                >
-                  ⊞
-                </button>
-                <button
-                  className={`${styles.viewButton} ${
-                    viewMode === "list" ? styles.active : ""
-                  }`}
-                  onClick={() => setViewMode("list")}
-                >
-                  ☰
-                </button>
-              </div>
-
-              <select
-                className={styles.sortSelect}
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-              >
-                <option value="featured">Featured</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
-                <option value="name">Name: A to Z</option>
-              </select>
-            </div>
-          </div>
-
-          <div className={styles.categoryTabs}>
-            {categories.map((category) => (
-              <button
-                key={category.id}
-                className={`${styles.categoryTab} ${
-                  activeCategory === category.id ? styles.active : ""
-                }`}
-                onClick={() => setActiveCategory(category.id)}
-              >
-                <span className={styles.categoryIcon}>{category.icon}</span>
-                <span>{category.name}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Loading & Error states */}
-        {loading && <p className={styles.resultsText}>Loading products…</p>}
-        {error && !loading && <p className={styles.resultsText}>{error}</p>}
+        <LoadingStates loading={loading} error={error} />
 
         {!loading && !error && (
           <>
-            <div
-              className={`${styles.productsGrid} ${styles[viewMode]} ${
-                animationTrigger ? styles.animate : ""
-              }`}
-            >
-              {sortedProducts.map((product, index) => (
-                <div
-                  key={product.id}
-                  className={styles.productCard}
-                  style={{ "--delay": `${index * 0.1}s` }}
-                >
-                  {/* Stock Status Badges */}
-                  {product.stock === 0 && (
-                    <div className={styles.outOfStock}>Out of Stock</div>
-                  )}
-                  {product.stock > 0 && product.stock <= 5 && (
-                    <div className={styles.lowStock}>Low Stock</div>
-                  )}
+            <ProductGrid
+              products={sortedProducts}
+              viewMode={viewMode}
+              animationTrigger={animationTrigger}
+              onQuickView={handleQuickView}
+              onAddToCart={handleAddToCart}
+              onBuyNow={handleBuyNow}
+            />
 
-                  <div className={styles.imageContainer}>
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className={styles.productImage}
-                      loading="lazy"
-                    />
-                    <div className={styles.imageOverlay}>
-                      <button
-                        className={styles.quickView}
-                        onClick={() => console.log("Quick view:", product.id)}
-                      >
-                        👁 Quick View
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className={styles.productInfo}>
-                    <div className={styles.productHeader}>
-                      <h3 className={styles.productName}>{product.name}</h3>
-                    </div>
-
-                    <div className={styles.description}>
-                      <p>{product.description}</p>
-                    </div>
-
-                    <div className={styles.stockInfo}>
-                      <span className={styles.stockLabel}>Stock:</span>
-                      <span
-                        className={`${styles.stockValue} ${
-                          product.stock === 0
-                            ? styles.outOfStockText
-                            : product.stock <= 5
-                            ? styles.lowStockText
-                            : styles.inStockText
-                        }`}
-                      >
-                        {product.stock === 0
-                          ? "Out of Stock"
-                          : `${product.stock} available`}
-                      </span>
-                    </div>
-
-                    <div className={styles.priceSection}>
-                      <div className={styles.prices}>
-                        <span className={styles.currentPrice}>
-                          ₹{product.price}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className={styles.actions}>
-                      {/* 1) First button -> Buy Now (text), keep same disabled logic */}
-                      <button
-                        className={`${styles.addToCartBtn} ${
-                          product.stock === 0 ? styles.disabled : ""
-                        }`}
-                        disabled={product.stock === 0}
-                      >
-                        {product.stock === 0 ? "Out of Stock" : "Buy Now"}
-                      </button>
-
-                      {/* 2) Second button -> icon-only Add to Cart (no text) */}
-                      {product.stock > 0 && (
-                        <button
-                          className={`${styles.cartBtn}`}
-                          aria-label="Add to Cart"
-                          title="Add to Cart"
-                        >
-                          🛒
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className={styles.loadMore}>
-              <button className={styles.loadMoreBtn}>
-                Load More Products
-                <span className={styles.loadIcon}>↓</span>
-              </button>
-              <p className={styles.resultsText}>
-                Showing {sortedProducts.length} products
-              </p>
-            </div>
+            <LoadMore
+              productCount={sortedProducts.length}
+              onLoadMore={handleLoadMore}
+            />
           </>
         )}
       </div>
