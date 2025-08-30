@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 import styles from "./CartPage.module.css";
+import { toast } from "react-toastify";
 
 const CartPage = () => {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -147,6 +148,28 @@ const CartPage = () => {
     );
   }
 
+  const handleDelete = async (id) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/cart/${id}`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message);
+      }
+      console.log(data.message);
+      setCart((prevCart) => ({
+        ...prevCart,
+        items: prevCart.items?.filter((item) => item.id !== id) || [],
+      }));
+      toast.success("Item deleted from cart");
+    } catch (error) {
+      console.log("error deleting item from cart: ", error.message);
+      toast.error("Something went wrong");
+    }
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -188,6 +211,13 @@ const CartPage = () => {
                 <div className={styles.subtotal}>
                   {formatPrice(item.product.price * item.quantity)}
                 </div>
+                <button
+                  className={styles.deleteButton}
+                  onClick={() => handleDelete(item.id)}
+                  title="Remove item from cart"
+                >
+                  ✕
+                </button>
               </div>
             </div>
           ))}
