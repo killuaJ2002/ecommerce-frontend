@@ -148,7 +148,7 @@ const CartPage = () => {
     );
   }
 
-  const handleDelete = async (id) => {
+  const handleDeleteItem = async (id) => {
     try {
       const res = await fetch(`${API_BASE_URL}/cart/${id}`, {
         method: "DELETE",
@@ -165,7 +165,26 @@ const CartPage = () => {
       }));
       toast.success("Item deleted from cart");
     } catch (error) {
-      console.log("error deleting item from cart: ", error.message);
+      console.log("Error deleting item from cart: ", error.message);
+      toast.error("Something went wrong");
+    }
+  };
+
+  const handleDeleteCart = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/cart`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message);
+      }
+      console.log(data.message);
+      setCart({});
+      toast.success("Cart deleted successfully");
+    } catch (error) {
+      console.log("Error deleting cart: ", error.message);
       toast.error("Something went wrong");
     }
   };
@@ -213,7 +232,7 @@ const CartPage = () => {
                 </div>
                 <button
                   className={styles.deleteButton}
-                  onClick={() => handleDelete(item.id)}
+                  onClick={() => handleDeleteItem(item.id)}
                   title="Remove item from cart"
                 >
                   ✕
@@ -261,7 +280,12 @@ const CartPage = () => {
           </div>
 
           <button className={styles.checkoutButton}>Proceed to Checkout</button>
-
+          <button
+            className={styles.clearCartButton}
+            onClick={() => handleDeleteCart()}
+          >
+            Clear Cart
+          </button>
           <Link to="/" className={styles.continueShoppingLink}>
             ← Continue Shopping
           </Link>
