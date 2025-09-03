@@ -15,7 +15,7 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const URL = "http://localhost:8000/api/users";
+  const URL = "http://localhost:8000/api/user";
 
   // check for existing token on app load
   useEffect(() => {

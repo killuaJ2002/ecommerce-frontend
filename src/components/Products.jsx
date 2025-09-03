@@ -48,7 +48,7 @@ const Products = () => {
       try {
         setLoading(true);
         setError("");
-        const res = await fetch(`${API_BASE_URL}/products`, {
+        const res = await fetch(`${API_BASE_URL}/product`, {
           signal: ac.signal,
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);

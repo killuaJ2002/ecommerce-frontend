@@ -43,7 +43,7 @@ const SignUpPage = () => {
       if (result.success) {
         navigate("/");
       } else {
-        const response = await fetch("http://localhost:8000/api/users/signup", {
+        const response = await fetch("http://localhost:8000/api/user/signup", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(formData),
