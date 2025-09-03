@@ -31,6 +31,11 @@ const Products = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [addingToCart, setAddingToCart] = useState(null);
+
+  // Pagination state
+  const [displayCount, setDisplayCount] = useState(6);
+  const PRODUCTS_PER_PAGE = 6;
+
   const { getAuthHeaders } = useAuth();
 
   // Categories
@@ -91,6 +96,18 @@ const Products = () => {
     }
   });
 
+  // Get products to display (limited by displayCount)
+  const displayedProducts = sortedProducts.slice(0, displayCount);
+
+  // Check if there are more products to load
+  const hasMoreProducts = displayCount < sortedProducts.length;
+  const remainingProducts = sortedProducts.length - displayCount;
+
+  // Reset display count when category or sort changes
+  useEffect(() => {
+    setDisplayCount(PRODUCTS_PER_PAGE);
+  }, [activeCategory, sortBy]);
+
   // Animation trigger for category/sort changes
   useEffect(() => {
     setAnimationTrigger(true);
@@ -134,7 +151,14 @@ const Products = () => {
   };
 
   const handleLoadMore = () => {
-    console.log("Load more products");
+    const newDisplayCount = displayCount + PRODUCTS_PER_PAGE;
+    setDisplayCount(newDisplayCount);
+    console.log(
+      `Loading more products. Now showing: ${Math.min(
+        newDisplayCount,
+        sortedProducts.length
+      )} of ${sortedProducts.length}`
+    );
   };
 
   return (
@@ -155,7 +179,7 @@ const Products = () => {
         {!loading && !error && (
           <>
             <ProductGrid
-              products={sortedProducts}
+              products={displayedProducts}
               viewMode={viewMode}
               animationTrigger={animationTrigger}
               onQuickView={handleQuickView}
@@ -164,10 +188,23 @@ const Products = () => {
               addingToCart={addingToCart}
             />
 
-            <LoadMore
-              productCount={sortedProducts.length}
-              onLoadMore={handleLoadMore}
-            />
+            {/* Only show LoadMore if there are more products */}
+            {hasMoreProducts && (
+              <LoadMore
+                productCount={displayedProducts.length}
+                totalCount={sortedProducts.length}
+                remainingCount={remainingProducts}
+                onLoadMore={handleLoadMore}
+              />
+            )}
+
+            {/* Optional: Show current status */}
+            {sortedProducts.length > 0 && (
+              <div className={styles.productStatus}>
+                Showing {displayedProducts.length} of {sortedProducts.length}{" "}
+                products
+              </div>
+            )}
           </>
         )}
       </div>

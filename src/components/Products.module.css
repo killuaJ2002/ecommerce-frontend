@@ -710,3 +710,10 @@
   0%, 100% { opacity: 0.6; }
   50% { opacity: 1; }
 }
+
+.productStatus {
+  text-align: center;
+  margin-top: 1rem;
+  color: #666;
+  font-size: 0.9rem;
+}
