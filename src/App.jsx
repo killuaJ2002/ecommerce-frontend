@@ -10,6 +10,7 @@ import SignUpPage from "./pages/SignUpPage";
 import HomePage from "./pages/HomePage";
 import CartPage from "./pages/CartPage";
 import NotFoundPage from "./pages/NotFoundPage";
+import CheckoutPage from "./pages/CheckoutPage";
 import { AuthProvider } from "./context/AuthContext";
 import { ToastContainer } from "react-toastify";
 const App = () => {
@@ -20,6 +21,7 @@ const App = () => {
         <Route path="signup" element={<SignUpPage />} />
         <Route index element={<HomePage />} />
         <Route path="cart" element={<CartPage />} />
+        <Route path="checkout" element={<CheckoutPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </>
     )
