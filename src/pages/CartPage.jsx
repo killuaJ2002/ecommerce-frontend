@@ -279,7 +279,9 @@ const CartPage = () => {
             </span>
           </div>
 
-          <button className={styles.checkoutButton}>Proceed to Checkout</button>
+          <Link to="/checkout" className={styles.checkoutButton}>
+            Proceed to Checkout
+          </Link>
           <button
             className={styles.clearCartButton}
             onClick={() => handleDeleteCart()}

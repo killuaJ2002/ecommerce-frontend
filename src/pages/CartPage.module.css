@@ -311,6 +311,7 @@
 }
 
 .checkoutButton {
+  display: block;
   width: 100%;
   background: #1f2937;
   color: white;
@@ -322,10 +323,15 @@
   cursor: pointer;
   transition: background-color 0.15s ease;
   margin-top: 1rem;
+  text-decoration: none;
+  text-align: center;
+  box-sizing: border-box;
 }
 
 .checkoutButton:hover {
   background: #374151;
+  color: white;
+  text-decoration: none;
 }
 
 .continueShoppingLink {
