@@ -9,7 +9,7 @@ const CheckoutPage = () => {
   useEffect(() => {
     // fetch addresses from backend
     const fetchAddresses = async () => {
-      const res = await fetch("http://localhost:8000/api/addresses", {
+      const res = await fetch("http://localhost:8000/api/address", {
         headers: getAuthHeaders(),
       });
       const data = await res.json();
