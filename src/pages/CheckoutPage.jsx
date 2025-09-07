@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import styles from "./CheckoutPage.module.css";
+
 const CheckoutPage = () => {
   const [step, setStep] = useState(1);
   const [addresses, setAddresses] = useState([]);
@@ -86,75 +88,118 @@ const CheckoutPage = () => {
     return `₹${price.toFixed(2)}`;
   };
 
-  return (
-    <div>
-      {step === 1 && (
-        <div>
-          <h2>Select Address</h2>
-          {addresses.map((addr) => (
-            <div key={addr.id}>
-              <label>
-                <input
-                  type="radio"
-                  name="address"
-                  value={addr.id}
-                  onChange={() => setSelectedAddress(addr)}
-                />
-                {addr.street}, {addr.zipCode}, {addr.city}, {addr.state}
-              </label>
-            </div>
-          ))}
+  const handleAddressSelect = (addr) => {
+    setSelectedAddress(addr);
+  };
 
-          <button disabled={!selectedAddress} onClick={() => setStep(2)}>
-            Continue to Review
+  return (
+    <div className={styles.container}>
+      {step === 1 && (
+        <div className={styles.stepContainer}>
+          <h2 className={styles.stepTitle}>Select Delivery Address</h2>
+
+          {addresses.length === 0 ? (
+            <div className={styles.emptyState}>
+              No addresses found. Please add an address to continue.
+            </div>
+          ) : (
+            <div className={styles.addressList}>
+              {addresses.map((addr) => (
+                <div
+                  key={addr.id}
+                  className={`${styles.addressOption} ${
+                    selectedAddress?.id === addr.id ? styles.selected : ""
+                  }`}
+                  onClick={() => handleAddressSelect(addr)}
+                >
+                  <input
+                    type="radio"
+                    name="address"
+                    value={addr.id}
+                    checked={selectedAddress?.id === addr.id}
+                    onChange={() => handleAddressSelect(addr)}
+                  />
+                  <div className={styles.addressText}>
+                    {addr.street}, {addr.zipCode}, {addr.city}, {addr.state}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <button
+            className={styles.continueButton}
+            disabled={!selectedAddress}
+            onClick={() => setStep(2)}
+          >
+            Continue to Review Order
           </button>
         </div>
       )}
 
       {step === 2 && (
-        <div>
-          <h2>Order Review</h2>
-          <div>
-            <h3>Shipping Address:</h3>
-            <p>
+        <div className={styles.stepContainer}>
+          <h2 className={styles.stepTitle}>Order Review</h2>
+
+          <div className={styles.reviewSection}>
+            <h3 className={styles.sectionTitle}>📍 Shipping Address</h3>
+            <div className={styles.shippingAddress}>
               {selectedAddress?.street}, {selectedAddress?.zipCode},{" "}
               {selectedAddress?.city}, {selectedAddress?.state}
-            </p>
+            </div>
           </div>
 
-          <div>
-            <h3>Items:</h3>
-            {cart?.items?.map((item) => (
-              <div key={item.id}>
-                <span>
-                  {item.product.name} x {item.quantity}
-                </span>
-                <span>₹{item.product.price * item.quantity}</span>
-              </div>
-            ))}
+          <div className={styles.reviewSection}>
+            <h3 className={styles.sectionTitle}>🛍️ Order Items</h3>
+            <div className={styles.itemsList}>
+              {cart?.items?.map((item) => (
+                <div key={item.id} className={styles.itemRow}>
+                  <div className={styles.itemDetails}>
+                    {item.product.name} × {item.quantity}
+                  </div>
+                  <div className={styles.itemPrice}>
+                    ₹{(item.product.price * item.quantity).toFixed(2)}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <div>
-            <h3>Price Summary</h3>
-            <div>
-              <span>Subtotal ({cart.items.length} items)</span>
-              <span>{formatPrice(calculateSubtotal())}</span>
+          <div className={styles.priceSummary}>
+            <h3 className={styles.sectionTitle}>💳 Price Summary</h3>
+
+            <div className={styles.summaryRow}>
+              <span className={styles.summaryLabel}>
+                Subtotal ({cart?.items?.length || 0} items)
+              </span>
+              <span className={styles.summaryValue}>
+                {formatPrice(calculateSubtotal())}
+              </span>
             </div>
-            <div>
-              <span>Tax (18%)</span>
-              <span>{formatPrice(calculateTax())}</span>
+
+            <div className={styles.summaryRow}>
+              <span className={styles.summaryLabel}>Tax (18%)</span>
+              <span className={styles.summaryValue}>
+                {formatPrice(calculateTax())}
+              </span>
             </div>
-            <div>
-              <span>Shipping</span>
-              <span>
+
+            <div className={styles.summaryRow}>
+              <span className={styles.summaryLabel}>Shipping</span>
+              <span
+                className={`${styles.summaryValue} ${
+                  calculateShipping() === 0 ? styles.freeShipping : ""
+                }`}
+              >
                 {calculateShipping() === 0
                   ? "FREE"
                   : formatPrice(calculateShipping())}
               </span>
             </div>
-            <div>
-              <span>Total</span>
-              <span>
+
+            <div className={`${styles.summaryRow} ${styles.total}`}>
+              <span className={styles.summaryLabel}>Total Amount</span>
+              <span className={styles.summaryValue}>
                 {formatPrice(
                   calculateSubtotal() + calculateTax() + calculateShipping()
                 )}
@@ -163,7 +208,12 @@ const CheckoutPage = () => {
           </div>
 
           <button
-            onClick={() => alert("Order Placed!")} // later call backend
+            className={styles.placeOrderButton}
+            onClick={() => {
+              // Later call backend to place order
+              toast.success("Order placed successfully!");
+              alert("Order Placed!");
+            }}
           >
             Place Order
           </button>
