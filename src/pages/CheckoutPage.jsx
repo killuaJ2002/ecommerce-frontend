@@ -92,6 +92,12 @@ const CheckoutPage = () => {
     setSelectedAddress(addr);
   };
 
+  const handleAddAddress = () => {
+    // Navigate to add address page or show add address modal
+    // You can customize this based on your routing structure
+    navigate("/profile/addresses", { state: { returnTo: "/checkout" } });
+  };
+
   return (
     <div className={styles.container}>
       {step === 1 && (
@@ -100,31 +106,52 @@ const CheckoutPage = () => {
 
           {addresses.length === 0 ? (
             <div className={styles.emptyState}>
-              No addresses found. Please add an address to continue.
+              <div className={styles.emptyStateIcon}>📍</div>
+              <h3 className={styles.emptyStateTitle}>No addresses found</h3>
+              <p className={styles.emptyStateText}>
+                Please add a delivery address to continue with your order.
+              </p>
+              <button
+                className={styles.addAddressButton}
+                onClick={handleAddAddress}
+              >
+                Add New Address
+              </button>
             </div>
           ) : (
-            <div className={styles.addressList}>
-              {addresses.map((addr) => (
-                <div
-                  key={addr.id}
-                  className={`${styles.addressOption} ${
-                    selectedAddress?.id === addr.id ? styles.selected : ""
-                  }`}
-                  onClick={() => handleAddressSelect(addr)}
-                >
-                  <input
-                    type="radio"
-                    name="address"
-                    value={addr.id}
-                    checked={selectedAddress?.id === addr.id}
-                    onChange={() => handleAddressSelect(addr)}
-                  />
-                  <div className={styles.addressText}>
-                    {addr.street}, {addr.zipCode}, {addr.city}, {addr.state}
+            <>
+              <div className={styles.addressList}>
+                {addresses.map((addr) => (
+                  <div
+                    key={addr.id}
+                    className={`${styles.addressOption} ${
+                      selectedAddress?.id === addr.id ? styles.selected : ""
+                    }`}
+                    onClick={() => handleAddressSelect(addr)}
+                  >
+                    <input
+                      type="radio"
+                      name="address"
+                      value={addr.id}
+                      checked={selectedAddress?.id === addr.id}
+                      onChange={() => handleAddressSelect(addr)}
+                    />
+                    <div className={styles.addressText}>
+                      {addr.street}, {addr.zipCode}, {addr.city}, {addr.state}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+
+              <div className={styles.addressActions}>
+                <button
+                  className={styles.addAddressSecondaryButton}
+                  onClick={handleAddAddress}
+                >
+                  + Add New Address
+                </button>
+              </div>
+            </>
           )}
 
           <button
