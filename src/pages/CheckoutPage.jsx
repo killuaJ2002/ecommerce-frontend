@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import styles from "./CheckoutPage.module.css";
 
@@ -92,12 +92,6 @@ const CheckoutPage = () => {
     setSelectedAddress(addr);
   };
 
-  const handleAddAddress = () => {
-    // Navigate to add address page or show add address modal
-    // You can customize this based on your routing structure
-    navigate("/profile/addresses", { state: { returnTo: "/checkout" } });
-  };
-
   return (
     <div className={styles.container}>
       {step === 1 && (
@@ -111,12 +105,13 @@ const CheckoutPage = () => {
               <p className={styles.emptyStateText}>
                 Please add a delivery address to continue with your order.
               </p>
-              <button
+              <Link
                 className={styles.addAddressButton}
-                onClick={handleAddAddress}
+                to="/address"
+                state={{ from: "checkout" }}
               >
                 Add New Address
-              </button>
+              </Link>
             </div>
           ) : (
             <>
@@ -144,12 +139,13 @@ const CheckoutPage = () => {
               </div>
 
               <div className={styles.addressActions}>
-                <button
+                <Link
+                  to="/address"
+                  state={{ from: "checkout" }}
                   className={styles.addAddressSecondaryButton}
-                  onClick={handleAddAddress}
                 >
                   + Add New Address
-                </button>
+                </Link>
               </div>
             </>
           )}
