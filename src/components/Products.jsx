@@ -6,6 +6,7 @@ import LoadMore from "./LoadMore";
 import styles from "./Products.module.css";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const DEFAULT_IMAGE =
@@ -36,7 +37,8 @@ const Products = () => {
   const [displayCount, setDisplayCount] = useState(6);
   const PRODUCTS_PER_PAGE = 6;
 
-  const { getAuthHeaders } = useAuth();
+  const { getAuthHeaders, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
 
   // Categories
   const categories = [
@@ -122,6 +124,10 @@ const Products = () => {
 
   const handleAddToCart = async (product) => {
     try {
+      if (!isAuthenticated()) {
+        navigate("/login");
+        return;
+      }
       setAddingToCart(product.id);
       const id = product.id;
       const res = await fetch(`${API_BASE_URL}/cart`, {
