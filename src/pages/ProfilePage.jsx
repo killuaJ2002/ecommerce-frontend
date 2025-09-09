@@ -1,50 +1,104 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import styles from "./ProfilePage.module.css";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "react-toastify";
+
 const ProfilePage = () => {
-  const { user, getAuthHeaders } = useAuth();
+  const {
+    user,
+    getAuthHeaders,
+    loading: authLoading,
+    isAuthenticated,
+  } = useAuth();
   const [addresses, setAddresses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  const navigate = useNavigate();
+
   useEffect(() => {
+    // Wait for auth to finish loading
+    if (authLoading) {
+      return;
+    }
+
+    // Check if user is authenticated
+    if (!isAuthenticated()) {
+      setLoading(false);
+      setError("Please log in to view your profile");
+      navigate("/login");
+      return;
+    }
+
     const fetchAddresses = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/address`, {
-          headers: getAuthHeaders(),
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data.message);
+        const headers = getAuthHeaders();
+
+        // Additional check to ensure we have proper headers
+        if (!headers || !headers.Authorization) {
+          throw new Error("Authentication required");
         }
+
+        const res = await fetch(`${API_BASE_URL}/address`, {
+          headers: headers,
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.message || `HTTP error! status: ${res.status}`);
+        }
+
         setAddresses(data.addresses || []);
+        setError(null);
       } catch (error) {
         console.log("Error fetching addresses: ", error.message);
+        setError(error.message);
         toast.error("Couldn't fetch addresses");
+        // Don't clear addresses on error - keep existing ones if any
+      } finally {
+        setLoading(false);
       }
     };
+
     fetchAddresses();
-    setLoading(false);
-  }, []);
+  }, [authLoading, isAuthenticated, getAuthHeaders, API_BASE_URL]);
 
   const handleEditProfile = () => {
     // Logic for editing profile
     console.log("Edit profile clicked");
   };
 
-  const handleDeleteAddress = (addressId) => {
-    // Logic for deleting address
-    console.log("Delete address:", addressId);
+  const handleDeleteAddress = async (addressId) => {
+    try {
+      const headers = getAuthHeaders();
+
+      const res = await fetch(`${API_BASE_URL}/address/${addressId}`, {
+        method: "DELETE",
+        headers: headers,
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.message || "Failed to delete address");
+      }
+
+      // Remove the address from local state
+      setAddresses((prev) => prev.filter((addr) => addr.id !== addressId));
+      toast.success("Address deleted successfully");
+    } catch (error) {
+      console.log("Error deleting address:", error.message);
+      toast.error("Failed to delete address");
+    }
   };
 
   const handleEditAddress = (addressId) => {
-    // Logic for editing address
+    // Logic for editing address - navigate to edit page
     console.log("Edit address:", addressId);
   };
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className={styles.container}>
         <div className={styles.loadingState}>
@@ -55,18 +109,15 @@ const ProfilePage = () => {
     );
   }
 
-  if (error) {
+  if (error && error.includes("log in")) {
     return (
       <div className={styles.container}>
         <div className={styles.errorState}>
-          <h2>Error Loading Profile</h2>
-          <p>{error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className={styles.retryButton}
-          >
-            Try Again
-          </button>
+          <h2>Authentication Required</h2>
+          <p>Please log in to view your profile</p>
+          <Link to="/login" className={styles.retryButton}>
+            Go to Login
+          </Link>
         </div>
       </div>
     );
@@ -79,12 +130,12 @@ const ProfilePage = () => {
         <div className={styles.profileHeader}>
           <div className={styles.profileInfo}>
             <div className={styles.avatar}>
-              {user.name ? user.name.charAt(0).toUpperCase() : "U"}
+              {user?.name ? user.name.charAt(0).toUpperCase() : "U"}
             </div>
             <div className={styles.userDetails}>
-              <h1 className={styles.userName}>{user.name || "User Name"}</h1>
+              <h1 className={styles.userName}>{user?.name || "User Name"}</h1>
               <p className={styles.userEmail}>
-                {user.email || "user@example.com"}
+                {user?.email || "user@example.com"}
               </p>
             </div>
           </div>
