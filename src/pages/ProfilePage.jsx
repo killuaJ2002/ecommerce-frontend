@@ -1,23 +1,31 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import styles from "./ProfilePage.module.css";
-
+import { useAuth } from "../context/AuthContext";
+import { toast } from "react-toastify";
 const ProfilePage = () => {
-  const [user, setUser] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    joinedDate: "",
-  });
-
+  const { user, getAuthHeaders } = useAuth();
   const [addresses, setAddresses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
   useEffect(() => {
-    // Placeholder for fetching user data
-    // fetchUserData();
-    // fetchAddresses();
+    const fetchAddresses = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/address`, {
+          headers: getAuthHeaders(),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.message);
+        }
+        setAddresses(data.addresses || []);
+      } catch (error) {
+        console.log("Error fetching addresses: ", error.message);
+        toast.error("Couldn't fetch addresses");
+      }
+    };
+    fetchAddresses();
     setLoading(false);
   }, []);
 
@@ -78,9 +86,6 @@ const ProfilePage = () => {
               <p className={styles.userEmail}>
                 {user.email || "user@example.com"}
               </p>
-              <p className={styles.joinDate}>
-                Member since {user.joinedDate || "January 2024"}
-              </p>
             </div>
           </div>
           <button onClick={handleEditProfile} className={styles.editButton}>
@@ -88,36 +93,15 @@ const ProfilePage = () => {
           </button>
         </div>
 
-        {/* User Details Section */}
-        <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>📱 Contact Information</h2>
-          <div className={styles.detailsCard}>
-            <div className={styles.detailRow}>
-              <span className={styles.detailLabel}>Name:</span>
-              <span className={styles.detailValue}>
-                {user.name || "Not provided"}
-              </span>
-            </div>
-            <div className={styles.detailRow}>
-              <span className={styles.detailLabel}>Email:</span>
-              <span className={styles.detailValue}>
-                {user.email || "Not provided"}
-              </span>
-            </div>
-            <div className={styles.detailRow}>
-              <span className={styles.detailLabel}>Phone:</span>
-              <span className={styles.detailValue}>
-                {user.phone || "Not provided"}
-              </span>
-            </div>
-          </div>
-        </div>
-
         {/* Addresses Section */}
         <div className={styles.section}>
           <div className={styles.sectionHeader}>
             <h2 className={styles.sectionTitle}>📍 Saved Addresses</h2>
-            <Link to="/profile/addresses/add" className={styles.addButton}>
+            <Link
+              to="/address"
+              state={{ from: "profile" }}
+              className={styles.addButton}
+            >
               + Add New Address
             </Link>
           </div>
@@ -128,7 +112,8 @@ const ProfilePage = () => {
               <h3>No addresses saved</h3>
               <p>Add your first delivery address to make checkout faster</p>
               <Link
-                to="/profile/addresses/add"
+                to="/address"
+                state={{ from: "profile" }}
                 className={styles.addFirstButton}
               >
                 Add Your First Address

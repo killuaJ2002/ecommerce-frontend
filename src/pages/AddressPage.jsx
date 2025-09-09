@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import styles from "./AddressPage.module.css";
 import { toast } from "react-toastify";
 import { useAuth } from "../context/AuthContext";
@@ -15,6 +15,7 @@ const AddressPage = () => {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const navigate = useNavigate();
   const { isAuthenticated, getAuthHeaders } = useAuth();
+  const location = useLocation();
 
   useEffect(() => {
     if (!isAuthenticated()) {
@@ -48,6 +49,18 @@ const AddressPage = () => {
     } catch (error) {
       console.log("Error while saving address: ", error.message);
       toast.error("Something went wrong");
+    }
+  };
+
+  const handleCancel = (e) => {
+    e.preventDefault();
+    const from = location.state?.from;
+    if (from === "checkout") {
+      navigate("/checkout");
+    } else if (from === "profile") {
+      navigate("/profile");
+    } else {
+      navigate("/");
     }
   };
 
@@ -128,9 +141,12 @@ const AddressPage = () => {
           </div>
 
           <div className={styles.buttonGroup}>
-            <Link to="/checkout" className={styles.cancelButton}>
+            <button
+              onClick={(e) => handleCancel(e)}
+              className={styles.cancelButton}
+            >
               Cancel
-            </Link>
+            </button>
             <button type="submit" className={styles.saveButton}>
               Save Address
             </button>
