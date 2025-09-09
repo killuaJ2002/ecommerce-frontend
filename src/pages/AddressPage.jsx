@@ -44,8 +44,14 @@ const AddressPage = () => {
         throw new Error(data.message);
       }
       toast.success("Address added");
-      console.log("Form submitted:", formData);
-      navigate("/checkout");
+      const from = location.state?.from;
+      if (from === "checkout") {
+        navigate("/checkout");
+      } else if (from === "profile") {
+        navigate("/profile");
+      } else {
+        navigate("/");
+      }
     } catch (error) {
       console.log("Error while saving address: ", error.message);
       toast.error("Something went wrong");
