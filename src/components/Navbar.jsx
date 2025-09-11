@@ -26,7 +26,7 @@ const Navbar = ({ isAuthenticated, handleLogout, cartCount = 0 }) => {
         </div>
 
         <div className={styles.navbar_right}>
-          <Link className={styles.navLink} to="/orders">
+          <Link className={styles.navLink} to="/order">
             <span className={styles.navIcon}>📦</span>
             <span>Orders</span>
           </Link>
