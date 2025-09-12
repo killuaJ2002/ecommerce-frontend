@@ -92,6 +92,53 @@ const CheckoutPage = () => {
     setSelectedAddress(addr);
   };
 
+  const handlePlaceOrder = async () => {
+    try {
+      const orderItems = cart?.items?.map((item) => ({
+        productId: item.product.id,
+        quantity: item.quantity, // ✅ use item.quantity
+      }));
+
+      const res = await fetch(`${API_BASE_URL}/order`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ items: orderItems }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to place order");
+      }
+
+      toast.success("Order placed successfully");
+      await handleDeleteCart();
+      navigate("/");
+    } catch (error) {
+      console.log("Error placing the order: ", error.message);
+      toast.error("Something went wrong");
+    }
+  };
+
+  const handleDeleteCart = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/cart`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to delete cart");
+      }
+
+      console.log(data.message);
+      setCart({});
+    } catch (error) {
+      console.log("Error deleting cart: ", error.message);
+      toast.error("Something went wrong");
+    }
+  };
+
   return (
     <div className={styles.container}>
       {step === 1 && (
@@ -233,9 +280,7 @@ const CheckoutPage = () => {
           <button
             className={styles.placeOrderButton}
             onClick={() => {
-              // Later call backend to place order
-              toast.success("Order placed successfully!");
-              alert("Order Placed!");
+              handlePlaceOrder();
             }}
           >
             Place Order
