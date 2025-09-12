@@ -1,15 +1,36 @@
 import { useEffect, useState } from "react";
 import styles from "./OrderPage.module.css";
+import { useAuth } from "../context/AuthContext";
+import { toast } from "react-toastify";
 
 const OrderPage = () => {
   const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  const { getAuthHeaders, loading: authLoading } = useAuth();
 
   useEffect(() => {
+    if (authLoading) return;
     const fetchOrders = async () => {
-      console.log("Orders fetched");
+      try {
+        const res = await fetch(`${API_BASE_URL}/order/my`, {
+          method: "GET",
+          headers: getAuthHeaders(),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.message || "Couldn't fetch order details");
+        }
+        setOrders(data.orders);
+      } catch (error) {
+        console.log("Error fetching orders: ", error.message);
+        toast.error(error.message);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchOrders();
-  }, []);
+  }, [loading, getAuthHeaders]);
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {
