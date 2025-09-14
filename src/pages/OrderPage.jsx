@@ -87,7 +87,6 @@ const OrderPage = () => {
           <div key={order.id} className={styles.orderCard}>
             <div className={styles.orderHeader}>
               <div className={styles.orderInfo}>
-                <h3 className={styles.orderId}>Order #{order.id}</h3>
                 <div className={styles.orderMeta}>
                   <span className={styles.orderDate}>
                     {formatDate(order.createdAt)} at{" "}

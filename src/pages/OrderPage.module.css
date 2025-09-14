@@ -102,13 +102,6 @@
   flex: 1;
 }
 
-.orderId {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #1a1a1a;
-  margin: 0 0 0.5rem 0;
-}
-
 .orderMeta {
   display: flex;
   align-items: center;
