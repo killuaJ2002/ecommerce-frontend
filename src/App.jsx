@@ -14,6 +14,7 @@ import CheckoutPage from "./pages/CheckoutPage";
 import AddressPage from "./pages/AddressPage";
 import ProfilePage from "./pages/ProfilePage";
 import OrderPage from "./pages/OrderPage";
+import BuyNowPage from "./pages/BuyNowPage";
 import { AuthProvider } from "./context/AuthContext";
 import { ToastContainer } from "react-toastify";
 const App = () => {
@@ -28,6 +29,7 @@ const App = () => {
         <Route path="address" element={<AddressPage />} />
         <Route path="profile" element={<ProfilePage />} />
         <Route path="order" element={<OrderPage />} />
+        <Route path="buynow" element={<BuyNowPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </>
     )

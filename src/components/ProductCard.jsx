@@ -1,5 +1,5 @@
 import styles from "./Products.module.css";
-
+import { Link } from "react-router-dom";
 const ProductCard = ({
   product,
   index,
@@ -73,15 +73,15 @@ const ProductCard = ({
 
         <div className={styles.actions}>
           {/* Buy Now button */}
-          <button
+          <Link
             className={`${styles.addToCartBtn} ${
               product.stock === 0 ? styles.disabled : ""
             }`}
             disabled={product.stock === 0}
-            onClick={() => onBuyNow(product)}
+            to="/buynow"
           >
             {product.stock === 0 ? "Out of Stock" : "Buy Now"}
-          </button>
+          </Link>
 
           {/* Add to Cart button with loading state */}
           {product.stock > 0 && (
