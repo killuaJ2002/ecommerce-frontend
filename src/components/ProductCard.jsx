@@ -79,6 +79,7 @@ const ProductCard = ({
             }`}
             disabled={product.stock === 0}
             to="/buynow"
+            state={{ product }}
           >
             {product.stock === 0 ? "Out of Stock" : "Buy Now"}
           </Link>

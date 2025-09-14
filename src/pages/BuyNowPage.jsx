@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import styles from "./BuyNowPage.module.css";
 
@@ -8,10 +8,12 @@ const BuyNowPage = () => {
   const [step, setStep] = useState(1);
   const [addresses, setAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
-  const [cart, setCart] = useState({});
+  const [quantity, setQuantity] = useState(1);
   const { getAuthHeaders, loading: authLoading, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  const location = useLocation();
+  const { product } = location?.state;
 
   useEffect(() => {
     // If auth is still loading, wait
@@ -24,26 +26,6 @@ const BuyNowPage = () => {
       navigate("/login", { state: { from: "/checkout" } });
       return;
     }
-
-    const fetchCart = async () => {
-      try {
-        const headers = getAuthHeaders();
-
-        const res = await fetch(`${API_BASE_URL}/cart`, {
-          method: "GET",
-          headers: headers,
-        });
-
-        const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data.message || `HTTP error! status: ${res.status}`);
-        }
-        setCart(data.cart);
-      } catch (error) {
-        console.log("Failed to fetch cart:", error.message);
-        toast.error("Couldn't fetch cart");
-      }
-    };
 
     // fetch addresses from backend
     const fetchAddresses = async () => {
@@ -62,18 +44,10 @@ const BuyNowPage = () => {
       }
     };
     fetchAddresses();
-    fetchCart();
   }, [authLoading, isAuthenticated, navigate]);
 
-  const calculateTotal = () => {
-    if (!cart.items) return 0;
-    return cart.items.reduce((total, item) => {
-      return total + item.product.price * item.quantity;
-    }, 0);
-  };
-
   const calculateSubtotal = () => {
-    return calculateTotal();
+    return product.price * quantity;
   };
 
   const calculateTax = () => {
@@ -94,47 +68,21 @@ const BuyNowPage = () => {
 
   const handlePlaceOrder = async () => {
     try {
-      const orderItems = cart?.items?.map((item) => ({
-        productId: item.product.id,
-        quantity: item.quantity, // ✅ use item.quantity
-      }));
-
+      const productId = product.id;
+      const items = [{ productId, quantity }];
       const res = await fetch(`${API_BASE_URL}/order`, {
         method: "POST",
         headers: getAuthHeaders(),
-        body: JSON.stringify({ items: orderItems }),
+        body: JSON.stringify({ items }),
       });
-
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.message || "Failed to place order");
+        throw new Error(data.message);
       }
-
-      toast.success("Order placed successfully");
-      await handleDeleteCart();
+      toast.success("Order Placed successfully");
       navigate("/");
     } catch (error) {
       console.log("Error placing the order: ", error.message);
-      toast.error("Something went wrong");
-    }
-  };
-
-  const handleDeleteCart = async () => {
-    try {
-      const res = await fetch(`${API_BASE_URL}/cart`, {
-        method: "DELETE",
-        headers: getAuthHeaders(),
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.message || "Failed to delete cart");
-      }
-
-      console.log(data.message);
-      setCart({});
-    } catch (error) {
-      console.log("Error deleting cart: ", error.message);
       toast.error("Something went wrong");
     }
   };
@@ -222,16 +170,12 @@ const BuyNowPage = () => {
           <div className={styles.reviewSection}>
             <h3 className={styles.sectionTitle}>🛍️ Order Items</h3>
             <div className={styles.itemsList}>
-              {cart?.items?.map((item) => (
-                <div key={item.id} className={styles.itemRow}>
-                  <div className={styles.itemDetails}>
-                    {item.product.name} × {item.quantity}
-                  </div>
-                  <div className={styles.itemPrice}>
-                    ₹{(item.product.price * item.quantity).toFixed(2)}
-                  </div>
+              <div key={product.id} className={styles.itemRow}>
+                <div className={styles.itemDetails}>{product.name} × 1</div>
+                <div className={styles.itemPrice}>
+                  ₹{(product.price * quantity).toFixed(2)}
                 </div>
-              ))}
+              </div>
             </div>
           </div>
 
@@ -240,7 +184,7 @@ const BuyNowPage = () => {
 
             <div className={styles.summaryRow}>
               <span className={styles.summaryLabel}>
-                Subtotal ({cart?.items?.length || 0} items)
+                Subtotal ({quantity} items)
               </span>
               <span className={styles.summaryValue}>
                 {formatPrice(calculateSubtotal())}
