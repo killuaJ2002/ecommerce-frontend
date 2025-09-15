@@ -63,11 +63,15 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
+  text-decoration: none;
+  display: inline-block;
 }
 
 .shopButton:hover {
   background: #2563eb;
   transform: translateY(-1px);
+  color: white;
+  text-decoration: none;
 }
 
 /* Orders List */
@@ -229,6 +233,30 @@
 .actionButton:first-child:hover {
   background: #2563eb;
   border-color: #2563eb;
+}
+
+/* Continue Shopping */
+.continueShoppingContainer {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.continueShoppingLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #6b7280;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: color 0.15s ease;
+}
+
+.continueShoppingLink:hover {
+  color: #111827;
 }
 
 /* Responsive Design */

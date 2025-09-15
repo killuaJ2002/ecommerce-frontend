@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import styles from "./OrderPage.module.css";
 import { useAuth } from "../context/AuthContext";
+import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 
 const OrderPage = () => {
@@ -69,7 +70,9 @@ const OrderPage = () => {
           <p className={styles.emptyDescription}>
             When you place your first order, it will appear here.
           </p>
-          <button className={styles.shopButton}>Start Shopping</button>
+          <Link to="/" className={styles.shopButton}>
+            Start Shopping
+          </Link>
         </div>
       </div>
     );
@@ -126,6 +129,12 @@ const OrderPage = () => {
             </div>
           </div>
         ))}
+      </div>
+
+      <div className={styles.continueShoppingContainer}>
+        <Link to="/" className={styles.continueShoppingLink}>
+          ← Continue Shopping
+        </Link>
       </div>
     </div>
   );
