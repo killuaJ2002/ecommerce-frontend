@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import styles from "./ProfilePage.module.css";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "react-toastify";
@@ -16,6 +16,7 @@ const ProfilePage = () => {
   const [error, setError] = useState(null);
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     // Wait for auth to finish loading
@@ -96,6 +97,17 @@ const ProfilePage = () => {
   const handleEditAddress = (addressId) => {
     // Logic for editing address - navigate to edit page
     console.log("Edit address:", addressId);
+  };
+
+  const handleBack = () => {
+    // Check if there's a previous page in history, otherwise go to home
+    if (location.state?.from) {
+      navigate(location.state.from);
+    } else if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate("/");
+    }
   };
 
   if (authLoading || loading) {
@@ -225,6 +237,13 @@ const ProfilePage = () => {
               <p>Manage your account preferences</p>
             </Link>
           </div>
+        </div>
+
+        {/* Back Button */}
+        <div className={styles.backButtonContainer}>
+          <button onClick={handleBack} className={styles.backButton}>
+            ← Back
+          </button>
         </div>
       </div>
     </div>
