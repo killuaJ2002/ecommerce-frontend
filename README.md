@@ -6,7 +6,6 @@ This is the **frontend** of an E-Commerce web application built using **React** 
 
 - ⚛️ **React**
 - ⚡ **Vite**
-- 🎨 **TailwindCSS**
 - 🧭 **React Router**
 
 ---
