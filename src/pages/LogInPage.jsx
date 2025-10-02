@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import styles from "./LoginPage.module.css";
+import styles from "./LogInPage.module.css";
 
 const LogInPage = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
