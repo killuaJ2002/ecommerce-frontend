@@ -50,11 +50,14 @@ const SignUpPage = () => {
       if (result.success) {
         navigate("/");
       } else {
-        const response = await fetch("http://localhost:8000/api/user/signup", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
-        });
+        const response = await fetch(
+          "https://flopkart-backend.onrender.com/api/user/signup",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(formData),
+          }
+        );
 
         const errorData = await response.json();
 
